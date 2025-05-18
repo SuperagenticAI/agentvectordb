@@ -47,7 +47,7 @@ class AgentMemoryCollection:
             )
 
         if not issubclass(base_schema, MemoryEntrySchema): # Check type, not instance
-             raise SchemaError(f"Collection '{name}': base_schema must be a subclass of agentvector.schemas.MemoryEntrySchema.")
+             raise SchemaError(f"Collection '{name}': base_schema must be a subclass of agentvectordb.schemas.MemoryEntrySchema.")
         self.BaseSchema = base_schema
         self.DynamicSchema = create_dynamic_memory_entry_schema(self.BaseSchema, self._vector_dimension)
 

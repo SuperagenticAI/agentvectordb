@@ -17,7 +17,7 @@ class BaseEmbeddingFunction:
 
 class DefaultTextEmbeddingFunction(BaseEmbeddingFunction):
     """
-    A placeholder/example text embedding function for AgentVector.
+    A placeholder/example text embedding function for AgentVectorDB.
     Uses pseudo-random vectors for demonstration and testing.
     Replace with a robust model (e.g., Sentence Transformers) for real applications.
     """

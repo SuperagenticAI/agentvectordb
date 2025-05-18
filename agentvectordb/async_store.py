@@ -3,17 +3,17 @@ import lancedb
 import asyncio
 from typing import List, Optional, Type, Any, Dict
 
-from .store import AgentVectorStore
+from .store import AgentVectorDBStore
 from .collection import AgentMemoryCollection
 from .schemas import MemoryEntrySchema
 from .exceptions import InitializationError, OperationError
 from .async_collection import AsyncAgentMemoryCollection
 
-class AsyncAgentVectorStore:
+class AsyncAgentVectorDBStore:
     def __init__(self, db_path: str):
         self.db_path = db_path
         # Use the sync store for all actual DB operations
-        self._sync_store = AgentVectorStore(db_path=db_path)
+        self._sync_store = AgentVectorDBStore(db_path=db_path)
         self._collections_cache: Dict[str, AgentMemoryCollection] = {}
 
     async def get_or_create_collection(
@@ -40,7 +40,7 @@ class AsyncAgentVectorStore:
         # MVP: get_collection primarily returns cached collections.
         # Robustly opening an arbitrary existing table from disk and rehydrating its exact
         # AgentMemoryCollection Python object configuration (EF instance, base_schema type, etc.)
-        # is complex as this metadata isn't stored by LanceDB in a way AgentVector can easily retrieve.
+        # is complex as this metadata isn't stored by LanceDB in a way AgentVectorDB can easily retrieve.
         # Users should use get_or_create_collection to ensure consistent configuration.
         if name in self._collections_cache:
             return self._collections_cache[name]

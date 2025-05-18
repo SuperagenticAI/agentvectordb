@@ -8,7 +8,7 @@ from .schemas import MemoryEntrySchema # For type hints
 class AsyncAgentMemory:
     """
     Asynchronous wrapper for AgentMemory, using asyncio.to_thread for non-blocking operations.
-    This makes AgentVector compatible with async-first agent frameworks.
+    This makes AgentVectorDB compatible with async-first agent frameworks.
     """
     def __init__(self, sync_memory_instance: AgentMemory):
         """
@@ -18,7 +18,7 @@ class AsyncAgentMemory:
             sync_memory_instance: A fully configured instance of the synchronous AgentMemory.
         """
         if not isinstance(sync_memory_instance, AgentMemory):
-            raise TypeError("sync_memory_instance must be an instance of agentvector.AgentMemory")
+            raise TypeError("sync_memory_instance must be an instance of agentvectordb.AgentMemory")
         self._sync_memory = sync_memory_instance
 
     @property

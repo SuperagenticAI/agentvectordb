@@ -8,7 +8,7 @@ from .collection import AgentMemoryCollection
 from .schemas import MemoryEntrySchema
 from .exceptions import InitializationError, OperationError
 
-class AgentVectorStore:
+class AgentVectorDBStore:
     def __init__(self, db_path: str):
         self.db_path = db_path
         try:

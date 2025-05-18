@@ -1,12 +1,12 @@
-# 🧠 AgentVector
+# 🧠 AgentVectorDB
 
-**AgentVector: The Cognitive Core for Your AI Agents**
+**AgentVectorDB: The Cognitive Core for Your AI Agents**
 
-AgentVector is a lightweight, embeddable vector database designed for agentic AI systems. It empowers your agents with persistent memory, semantic search, and tools for internal reasoning and learning. Built on the performance and simplicity of [LanceDB](https://github.com/lancedb/lancedb), AgentVector is the default memory layer for sophisticated AI agents, offering a familiar "collection-based" API.
+AgentVectorDB is a lightweight, embeddable vector database designed for agentic AI systems. It empowers your agents with persistent memory, semantic search, and tools for internal reasoning and learning. Built on the performance and simplicity of [LanceDB](https://github.com/lancedb/lancedb), AgentVectorDB is the default memory layer for sophisticated AI agents, offering a familiar "collection-based" API.
 
 ---
 
-## 🚀 Why AgentVector?
+## 🚀 Why AgentVectorDB?
 
 - **Familiar API:** Uses a `Store -> Collection` model, similar to other popular vector databases.
 - **Lightweight & Embeddable:** Runs directly within your agent's process using LanceDB. No separate server, minimal dependencies.
@@ -14,7 +14,7 @@ AgentVector is a lightweight, embeddable vector database designed for agentic AI
 - **Temporal Dynamics:** Built-in support for recency, memory decay (`prune_memories`), and tracking when memories were last accessed.
 - **Rich Querying:** Powerful semantic search combined with SQL filtering (`filter_sql`) for maximum flexibility.
 - **Seamless Embedding Integration:** Works with [LanceDB's embedding functions](https://lancedb.github.io/lancedb/embeddings/) or your custom embedding models, configurable per collection.
-- **Asynchronous API:** Provides `AsyncAgentVectorStore` and `AsyncAgentMemoryCollection` for integration with async-first agent frameworks.
+- **Asynchronous API:** Provides `AsyncAgentVectorDBStore` and `AsyncAgentMemoryCollection` for integration with async-first agent frameworks.
 - **Open Source & Extensible:** Built with best practices, ready for community contributions.
 
 ---
@@ -36,18 +36,18 @@ AgentVector is a lightweight, embeddable vector database designed for agentic AI
 ## 📦 Installation
 
 ```bash
-pip install agentvector
+pip install agentvectordb
 ```
 
 Or for the latest development version:
 ```bash
-pip install git+https://github.com/superagenticai/agentvector.git
+pip install git+https://github.com/superagenticai/agentvectordb.git
 ```
 
 To install locally for development:
 ```bash
-git clone https://github.com/superagenticai/agentvector.git
-cd agentvector
+git clone https://github.com/superagenticai/agentvectordb.git
+cd agentvectordb
 pip install -e .[dev]
 ```
 
@@ -59,15 +59,15 @@ pip install -e .[dev]
 import asyncio
 import os
 import shutil
-from agentvector import AgentVectorStore, AsyncAgentVectorStore
-from agentvector.embeddings import DefaultTextEmbeddingFunction
+from agentvectordb import AgentVectorDBStore, AsyncAgentVectorDBStore
+from agentvectordb.embeddings import DefaultTextEmbeddingFunction
 
 print("\033[1;36m")
-print("🧠🚀 Welcome to AgentVector Quickstart! 🚀🧠")
+print("🧠🚀 Welcome to AgentVectorDB Quickstart! 🚀🧠")
 print("A lightweight, embeddable vector database for agentic AI systems, built on LanceDB.\n")
 print("\033[0m")
 
-DB_DIR = "./_agentvector_mvp_quickstart_db"
+DB_DIR = "./_agentvectordb_mvp_quickstart_db"
 ef = DefaultTextEmbeddingFunction(dimension=64)
 
 def cleanup_db_dir(db_directory):
@@ -79,7 +79,7 @@ cleanup_db_dir(DB_DIR)
 
 # --- Synchronous API ---
 print("\033[1;34m🔹 [SYNC] Episodic Memory Demo\033[0m")
-store = AgentVectorStore(db_path=DB_DIR)
+store = AgentVectorDBStore(db_path=DB_DIR)
 episodic_memories = store.get_or_create_collection(
     name="episodic_stream",
     embedding_function=ef,
@@ -87,10 +87,10 @@ episodic_memories = store.get_or_create_collection(
     recreate=True
 )
 episodic_memories.add(
-    content="User inquired about AgentVector's collection feature.",
+    content="User inquired about AgentVectorDB's collection feature.",
     type="user_interaction",
     source="chat_interface",
-    tags=["agentvector_feature", "collections_api"]
+    tags=["agentvectordb_feature", "collections_api"]
 )
 episodic_memories.add(
     content="Agent decided to use the 'episodic_stream' collection for observations.",
@@ -99,7 +99,7 @@ episodic_memories.add(
     importance_score=0.7
 )
 query_results = episodic_memories.query(
-    query_text="AgentVector collection feature",
+    query_text="AgentVectorDB collection feature",
     k=1,
     filter_sql="type = 'user_interaction'"
 )
@@ -110,7 +110,7 @@ for res in query_results:
 # --- Asynchronous API ---
 async def async_example_main():
     print("\n\033[1;34m🔹 [ASYNC] Agent Thoughts Log Demo\033[0m")
-    async_store = AsyncAgentVectorStore(db_path=DB_DIR)
+    async_store = AsyncAgentVectorDBStore(db_path=DB_DIR)
     agent_thoughts = await async_store.get_or_create_collection(
         name="agent_thoughts_log",
         embedding_function=ef,
@@ -136,7 +136,7 @@ async def async_example_main():
     for coll_name in collections:
         print(f"  - {coll_name}")
 
-    print("\n\033[1;36m🎉 Quickstart complete! Explore more with AgentVector.\033[0m")
+    print("\n\033[1;36m🎉 Quickstart complete! Explore more with AgentVectorDB.\033[0m")
 
 if __name__ == "__main__":
     asyncio.run(async_example_main())
@@ -146,7 +146,7 @@ if __name__ == "__main__":
 
 ## 🛠️ API Overview
 
-### `AgentVectorStore(db_path: str)`
+### `AgentVectorDBStore(db_path: str)`
 
 - **db_path:** Directory where LanceDB database files are stored.
 
@@ -163,7 +163,7 @@ if __name__ == "__main__":
 
 ### Asynchronous API
 
-- `AsyncAgentVectorStore`
+- `AsyncAgentVectorDBStore`
 - `AsyncAgentMemoryCollection`
     - All methods of their synchronous counterparts are available as `async` methods.
 
@@ -174,7 +174,7 @@ if __name__ == "__main__":
 ### Multiple Collections
 
 ```python
-store = AgentVectorStore(db_path="./my_multi_agent_db")
+store = AgentVectorDBStore(db_path="./my_multi_agent_db")
 kb_ef = DefaultTextEmbeddingFunction(dimension=128)
 knowledge_base = store.get_or_create_collection(
     name="knowledge_base",
@@ -222,7 +222,7 @@ See the [`examples/`](./examples/) directory for:
 
 ## 🛤️ Roadmap & Contributing
 
-AgentVector is actively evolving. Planned features include:
+AgentVectorDB is actively evolving. Planned features include:
 - More sophisticated filter builders
 - Reflection/summarization helpers
 - Schema evolution helpers
@@ -238,4 +238,4 @@ This project is licensed under the Apache-2.0 License.
 
 ---
 
-**AgentVector: Give your AI agents a memory!**
+**AgentVectorDB: Give your AI agents a memory!**

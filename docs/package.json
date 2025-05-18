@@ -1,7 +1,7 @@
 {
-  "name": "agentvector-docs",
+  "name": "agentvectordb-docs",
   "version": "1.0.0",
-  "description": "Documentation for AgentVector",
+  "description": "Documentation for AgentVectorDB",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

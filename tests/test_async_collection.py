@@ -1,7 +1,7 @@
 import pytest
 import time
 from .conftest import VECTOR_DIMENSION_TEST, test_embedding_function, get_embedding_vec # Import fixtures
-from agentvector import AsyncAgentMemoryCollection # The class we are testing
+from agentvectordb import AsyncAgentMemoryCollection # The class we are testing
 
 @pytest.mark.asyncio
 async def test_async_collection_add_and_get(async_collection: AsyncAgentMemoryCollection, get_embedding_vec):

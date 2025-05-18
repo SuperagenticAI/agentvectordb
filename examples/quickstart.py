@@ -2,16 +2,16 @@
 import asyncio
 import os
 import shutil
-from agentvector import AgentVectorStore, AsyncAgentVectorStore
-from agentvector.embeddings import DefaultTextEmbeddingFunction
+from agentvectordb import AgentVectorDBStore, AsyncAgentVectorDBStore
+from agentvectordb.embeddings import DefaultTextEmbeddingFunction
 
-# --- AgentVector Banner ---
+# --- AgentVectorDB Banner ---
 print("\033[1;36m")
-print("🧠🚀 Welcome to AgentVector Quickstart! 🚀🧠")
+print("🧠🚀 Welcome to AgentVectorDB Quickstart! 🚀🧠")
 print("A lightweight, embeddable vector database for agentic AI systems, built on LanceDB.\n")
 print("\033[0m")
 
-DB_DIR = "./_agentvector_mvp_quickstart_db"
+DB_DIR = "./_agentvectordb_mvp_quickstart_db"
 ef = DefaultTextEmbeddingFunction(dimension=64)
 
 def cleanup_db_dir(db_directory):
@@ -23,7 +23,7 @@ cleanup_db_dir(DB_DIR)
 
 # --- Synchronous API ---
 print("\033[1;34m🔹 [SYNC] Episodic Memory Demo\033[0m")
-store = AgentVectorStore(db_path=DB_DIR)
+store = AgentVectorDBStore(db_path=DB_DIR)
 episodic_memories = store.get_or_create_collection(
     name="episodic_stream",
     embedding_function=ef,
@@ -31,10 +31,10 @@ episodic_memories = store.get_or_create_collection(
     recreate=True
 )
 episodic_memories.add(
-    content="User inquired about AgentVector's collection feature.",
+    content="User inquired about AgentVectorDB's collection feature.",
     type="user_interaction",
     source="chat_interface",
-    tags=["agentvector_feature", "collections_api"]
+    tags=["agentvectordb_feature", "collections_api"]
 )
 episodic_memories.add(
     content="Agent decided to use the 'episodic_stream' collection for observations.",
@@ -43,7 +43,7 @@ episodic_memories.add(
     importance_score=0.7
 )
 query_results = episodic_memories.query(
-    query_text="AgentVector collection feature",
+    query_text="AgentVectorDB collection feature",
     k=1,
     filter_sql="type = 'user_interaction'"
 )
@@ -54,7 +54,7 @@ for res in query_results:
 # --- Asynchronous API ---
 async def async_example_main():
     print("\n\033[1;34m🔹 [ASYNC] Agent Thoughts Log Demo\033[0m")
-    async_store = AsyncAgentVectorStore(db_path=DB_DIR)
+    async_store = AsyncAgentVectorDBStore(db_path=DB_DIR)
     agent_thoughts = await async_store.get_or_create_collection(
         name="agent_thoughts_log",
         embedding_function=ef,
@@ -80,7 +80,7 @@ async def async_example_main():
     for coll_name in collections:
         print(f"  - {coll_name}")
 
-    print("\n\033[1;36m🎉 Quickstart complete! Explore more with AgentVector.\033[0m")
+    print("\n\033[1;36m🎉 Quickstart complete! Explore more with AgentVectorDB.\033[0m")
 
 if __name__ == "__main__":
     asyncio.run(async_example_main())

@@ -1,10 +1,10 @@
-## Choosing and Using Embedding Models with AgentVector
+## Choosing and Using Embedding Models with AgentVectorDB
 
-AgentVector is designed to work with a variety of text embedding models. The quality of your embeddings directly impacts how well your AI agents can understand context, retrieve relevant memories, and perform reasoning tasks. This guide will help you understand your options and how to integrate them.
+AgentVectorDB is designed to work with a variety of text embedding models. The quality of your embeddings directly impacts how well your AI agents can understand context, retrieve relevant memories, and perform reasoning tasks. This guide will help you understand your options and how to integrate them.
 
 ### What are Embeddings?
 
-In simple terms, embedding models convert text (or other data types) into a list of numbers called a "vector." These vectors capture the semantic meaning of the text. Texts with similar meanings will have vectors that are "close" to each other in a multi-dimensional space. AgentVector uses these vectors to find the most relevant memories for your agent's current needs.
+In simple terms, embedding models convert text (or other data types) into a list of numbers called a "vector." These vectors capture the semantic meaning of the text. Texts with similar meanings will have vectors that are "close" to each other in a multi-dimensional space. AgentVectorDB uses these vectors to find the most relevant memories for your agent's current needs.
 
 ### Why Your Choice of Embedding Model Matters
 
@@ -15,17 +15,17 @@ In simple terms, embedding models convert text (or other data types) into a list
 *   **Domain Specificity:** General-purpose models work well for many tasks, but highly specialized domains might benefit from domain-specific or fine-tuned models.
 *   **Multilingual Needs:** If your agent needs to handle multiple languages, you'll need a multilingual model.
 
-AgentVector uses LanceDB under the hood, which has excellent support for integrating various embedding models, especially through its `EmbeddingFunctionRegistry` for models compatible with the `sentence-transformers` library and popular API-based models.
+AgentVectorDB uses LanceDB under the hood, which has excellent support for integrating various embedding models, especially through its `EmbeddingFunctionRegistry` for models compatible with the `sentence-transformers` library and popular API-based models.
 
-### How to Integrate Embedding Functions with AgentVector
+### How to Integrate Embedding Functions with AgentVectorDB
 
-When you create an `AgentMemoryCollection` using `AgentVectorStore`, you'll pass an `embedding_function` instance:
+When you create an `AgentMemoryCollection` using `AgentVectorDBStore`, you'll pass an `embedding_function` instance:
 
 ```python
-from agentvector import AgentVectorStore
+from agentvectordb import AgentVectorDBStore
 # ... import or define your embedding function (ef) ...
 
-store = AgentVectorStore(db_path="./my_agent_data")
+store = AgentVectorDBStore(db_path="./my_agent_data")
 my_collection = store.get_or_create_collection(
     name="my_memories",
     embedding_function=ef, # Your chosen embedding function instance
@@ -71,10 +71,10 @@ These models run on your own infrastructure, giving you data privacy and control
     ```
 
 *   **Custom Wrapper for Local Models (e.g., for Instructor or advanced BGE usage)**
-    If you need more control (like specific instruction formatting for Instructor or BGE models), you can create a custom embedding function class inheriting from `agentvector.embeddings.BaseEmbeddingFunction`.
+    If you need more control (like specific instruction formatting for Instructor or BGE models), you can create a custom embedding function class inheriting from `agentvectordb.embeddings.BaseEmbeddingFunction`.
 
     ```python
-    from agentvector.embeddings import BaseEmbeddingFunction
+    from agentvectordb.embeddings import BaseEmbeddingFunction
     from sentence_transformers import SentenceTransformer # pip install sentence-transformers
 
     class CustomBGEWrapper(BaseEmbeddingFunction):
@@ -149,7 +149,7 @@ These are convenient and often offer state-of-the-art performance but involve AP
 
     # If creating a custom Cohere wrapper (for more control or if not in registry):
     # import cohere # pip install cohere
-    # from agentvector.embeddings import BaseEmbeddingFunction
+    # from agentvectordb.embeddings import BaseEmbeddingFunction
     # class MyCohereEF(BaseEmbeddingFunction):
     #     def __init__(self, api_key: str, model_name="embed-english-v3.0"):
     #         self.co = cohere.Client(api_key)
@@ -227,4 +227,4 @@ These are convenient and often offer state-of-the-art performance but involve AP
 *   **LanceDB Documentation:** Often lists explicitly supported models or easy integrations.
 *   **Provider Documentation:** OpenAI, Cohere, Google Cloud AI Platform for their respective offerings.
 
-By providing an `embedding_function` to your `AgentMemoryCollection`, AgentVector handles the process of generating vectors when you `add()` text content and when you `query()` using `query_text`. If you provide raw vectors, ensure they match the `vector_dimension` expected by the collection.
+By providing an `embedding_function` to your `AgentMemoryCollection`, AgentVectorDB handles the process of generating vectors when you `add()` text content and when you `query()` using `query_text`. If you provide raw vectors, ensure they match the `vector_dimension` expected by the collection.

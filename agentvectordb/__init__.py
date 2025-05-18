@@ -1,10 +1,10 @@
-from .store import AgentVectorStore
+from .store import AgentVectorDBStore
 from .collection import AgentMemoryCollection
-from .async_store import AsyncAgentVectorStore
+from .async_store import AsyncAgentVectorDBStore
 from .async_collection import AsyncAgentMemoryCollection
 from .schemas import MemoryEntrySchema, create_dynamic_memory_entry_schema
 from .exceptions import (
-    AgentVectorException,
+    AgentVectorDBException,
     InitializationError,
     SchemaError,
     QueryError,
@@ -18,15 +18,15 @@ __version__ = "0.3.0" # MVP version with Store/Collection API
 
 __all__ = [
     # Core API
-    "AgentVectorStore",
+    "AgentVectorDBStore",
     "AgentMemoryCollection",
-    "AsyncAgentVectorStore",
+    "AsyncAgentVectorDBStore",
     "AsyncAgentMemoryCollection",
     # Schemas & Helpers
     "MemoryEntrySchema",
     "create_dynamic_memory_entry_schema",
     # Exceptions
-    "AgentVectorException",
+    "AgentVectorDBException",
     "InitializationError",
     "SchemaError",
     "QueryError",

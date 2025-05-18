@@ -28,7 +28,7 @@ class AgentMemory:
         table_name: str = "memories",
         base_schema: Type[MemoryEntrySchema] = MemoryEntrySchema,
         vector_dimension: Optional[int] = None,
-        embedding_function: Optional[Any] = None, # LanceDB EmbeddingFunctionLike or AgentVector's BaseEmbeddingFunction
+        embedding_function: Optional[Any] = None, # LanceDB EmbeddingFunctionLike or AgentVectorDB's BaseEmbeddingFunction
         recreate_table: bool = False,
         update_last_accessed_on_query: bool = False,
     ):
@@ -43,7 +43,7 @@ class AgentMemory:
                 Required if not using an embedding_function that defines `ndims()`,
                 or if adding raw vectors without an embedding_function.
             embedding_function (Optional[Any]): A LanceDB compatible embedding function.
-                If provided, AgentVector can automatically embed content.
+                If provided, AgentVectorDB can automatically embed content.
                 This function should ideally have `source_column()` and `ndims()` methods.
             recreate_table (bool): If True, drops the table if it exists and creates a new one.
             update_last_accessed_on_query (bool): If True, automatically updates `timestamp_last_accessed`
@@ -78,7 +78,7 @@ class AgentMemory:
             raise InitializationError(f"Failed to connect to LanceDB at {self.db_path}: {e}")
 
         if not issubclass(base_schema, MemoryEntrySchema):
-             raise SchemaError(f"base_schema must be a subclass of agentvector.schemas.MemoryEntrySchema.")
+             raise SchemaError(f"base_schema must be a subclass of agentvectordb.schemas.MemoryEntrySchema.")
         self.BaseSchema = base_schema
 
         # Determine the final Pydantic schema for LanceDB table creation
@@ -585,7 +585,7 @@ class AgentMemory:
         """
         # self.db (LanceDBConnection) doesn't have an explicit .close() as of lancedb 0.6.0.
         # Operations are generally committed immediately.
-        print("AgentVector: LanceDB connection does not require explicit close. Resources are managed by the library.")
+        print("AgentVectorDB: LanceDB connection does not require explicit close. Resources are managed by the library.")
 
     def __len__(self):
         """Returns the total number of entries in the current table."""

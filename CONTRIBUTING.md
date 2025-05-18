@@ -1,4 +1,4 @@
-# Contributing to AgentVector
+# Contributing to AgentVectorDB
 
 👍 First off, thanks for taking the time to contribute! 🎉
 
@@ -20,8 +20,8 @@ This project and everyone participating in it are governed by our [Code of Condu
 1. Fork the repository
 2. Clone your fork:
 ```bash
-git clone https://github.com/your-username/agentvector.git
-cd agentvector
+git clone https://github.com/your-username/agentvectordb.git
+cd agentvectordb
 ```
 
 3. Set up your development environment:
@@ -90,7 +90,7 @@ We use Ruff for linting and formatting. Our code follows these principles:
 Example test:
 ```python
 def test_collection_creation_succeeds():
-    store = AgentVectorStore(db_path="./test_db")
+    store = AgentVectorDBStore(db_path="./test_db")
     collection = store.get_or_create_collection("test")
     assert collection is not None
 ```
@@ -136,4 +136,4 @@ def add_memory(self, content: str, importance: float) -> str:
 
 ## License
 
-By contributing to AgentVector, you agree that your contributions will be licensed under its Apache License 2.0.
+By contributing to AgentVectorDB, you agree that your contributions will be licensed under its Apache License 2.0.

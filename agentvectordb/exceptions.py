@@ -1,23 +1,23 @@
-class AgentVectorException(Exception):
-    """Base exception for AgentVector errors."""
+class AgentVectorDBException(Exception):
+    """Base exception for AgentVectorDB errors."""
     pass
 
-class InitializationError(AgentVectorException):
+class InitializationError(AgentVectorDBException):
     """Error during Store or Collection initialization."""
     pass
 
-class SchemaError(AgentVectorException):
+class SchemaError(AgentVectorDBException):
     """Error related to data schemas or Pydantic validation."""
     pass
 
-class QueryError(AgentVectorException):
+class QueryError(AgentVectorDBException):
     """Error during querying."""
     pass
 
-class OperationError(AgentVectorException):
+class OperationError(AgentVectorDBException):
     """Error during add, update, or delete operations."""
     pass
 
-class EmbeddingError(AgentVectorException):
+class EmbeddingError(AgentVectorDBException):
     """Error related to vector embedding generation or handling."""
     pass

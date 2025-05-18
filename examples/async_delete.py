@@ -1,15 +1,15 @@
 import asyncio
 import os
 import shutil
-from agentvector import AsyncAgentVectorStore
-from agentvector.embeddings import DefaultTextEmbeddingFunction
+from agentvectordb import AsyncAgentVectorDBStore
+from agentvectordb.embeddings import DefaultTextEmbeddingFunction
 
 print("\033[1;36m")
-print("🧠❌ AgentVector Async Delete Example ❌🧠")
+print("🧠❌ AgentVectorDB Async Delete Example ❌🧠")
 print("Demonstrating async deletion of memories.\n")
 print("\033[0m")
 
-DB_DIR = "./_agentvector_async_delete_db"
+DB_DIR = "./_agentvectordb_async_delete_db"
 ef = DefaultTextEmbeddingFunction(dimension=64)
 
 def cleanup_db_dir(db_directory):
@@ -20,7 +20,7 @@ def cleanup_db_dir(db_directory):
 cleanup_db_dir(DB_DIR)
 
 async def main():
-    store = AsyncAgentVectorStore(db_path=DB_DIR)
+    store = AsyncAgentVectorDBStore(db_path=DB_DIR)
     collection = await store.get_or_create_collection(
         name="delete_memories",
         embedding_function=ef,

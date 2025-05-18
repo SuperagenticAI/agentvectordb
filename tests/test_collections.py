@@ -3,9 +3,9 @@ import uuid
 import time
 from typing import List, Dict, Tuple
 
-from agentvector import AgentMemoryCollection, AsyncAgentMemoryCollection
-from agentvector.exceptions import SchemaError, EmbeddingError, QueryError, OperationError
-from agentvector.schemas import MemoryEntrySchema
+from agentvectordb import AgentMemoryCollection, AsyncAgentMemoryCollection
+from agentvectordb.exceptions import SchemaError, EmbeddingError, QueryError, OperationError
+from agentvectordb.schemas import MemoryEntrySchema
 from .conftest import VECTOR_DIMENSION_TEST, MyTestSchema, test_embedding_function, get_embedding_vec
 
 # Helper to generate multiple unique vectors

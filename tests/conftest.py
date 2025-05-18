@@ -5,15 +5,15 @@ import time
 import numpy as np # For sample_vector if needed, though EF is preferred
 from typing import List
 
-from agentvector import AgentVectorStore, AgentMemoryCollection, AsyncAgentVectorStore, AsyncAgentMemoryCollection
-from agentvector.embeddings import DefaultTextEmbeddingFunction
-from agentvector.schemas import MemoryEntrySchema, create_dynamic_memory_entry_schema
+from agentvectordb import AgentVectorDBStore, AgentMemoryCollection, AsyncAgentVectorDBStore, AsyncAgentMemoryCollection
+from agentvectordb.embeddings import DefaultTextEmbeddingFunction
+from agentvectordb.schemas import MemoryEntrySchema, create_dynamic_memory_entry_schema
 
 # --- Constants for Tests ---
 # Note: Using a more unique prefix or a subdirectory within a standard test temp dir might be better
 # For example, using pytest's tmp_path fixture for the root test DB dir.
 # For now, this direct creation is simpler to illustrate.
-TEST_DB_ROOT_DIR_PREFIX = "_test_agentvector_dbs_"
+TEST_DB_ROOT_DIR_PREFIX = "_test_agentvectordb_dbs_"
 VECTOR_DIMENSION_TEST = 16 # Small dimension for faster tests
 
 # --- Embedding Function Fixture ---
@@ -47,12 +47,12 @@ def unique_test_db_path():
 
 # --- Synchronous Store and Collection Fixtures ---
 @pytest.fixture
-def sync_store(unique_test_db_path: str) -> AgentVectorStore:
-    """Provides a clean AgentVectorStore instance for each test function."""
-    return AgentVectorStore(db_path=unique_test_db_path)
+def sync_store(unique_test_db_path: str) -> AgentVectorDBStore:
+    """Provides a clean AgentVectorDBStore instance for each test function."""
+    return AgentVectorDBStore(db_path=unique_test_db_path)
 
 @pytest.fixture
-def sync_collection(sync_store: AgentVectorStore, test_embedding_function) -> AgentMemoryCollection:
+def sync_collection(sync_store: AgentVectorDBStore, test_embedding_function) -> AgentMemoryCollection:
     """Provides a default, clean AgentMemoryCollection from the sync_store."""
     # Using a fixed name as the db_path is unique per test
     return sync_store.get_or_create_collection(
@@ -62,7 +62,7 @@ def sync_collection(sync_store: AgentVectorStore, test_embedding_function) -> Ag
     )
 
 @pytest.fixture
-def sync_collection_ts_update(sync_store: AgentVectorStore, test_embedding_function) -> AgentMemoryCollection:
+def sync_collection_ts_update(sync_store: AgentVectorDBStore, test_embedding_function) -> AgentMemoryCollection:
     """Provides a collection with timestamp_last_accessed updates enabled."""
     return sync_store.get_or_create_collection(
         name="sync_collection_ts",
@@ -73,13 +73,13 @@ def sync_collection_ts_update(sync_store: AgentVectorStore, test_embedding_funct
 
 # --- Asynchronous Store and Collection Fixtures ---
 @pytest.fixture
-async def async_store(unique_test_db_path: str) -> AsyncAgentVectorStore:
-    """Provides a clean AsyncAgentVectorStore instance for each async test function."""
-    # AsyncAgentVectorStore itself initializes a sync store, so db_path needs to be unique.
-    return AsyncAgentVectorStore(db_path=unique_test_db_path)
+async def async_store(unique_test_db_path: str) -> AsyncAgentVectorDBStore:
+    """Provides a clean AsyncAgentVectorDBStore instance for each async test function."""
+    # AsyncAgentVectorDBStore itself initializes a sync store, so db_path needs to be unique.
+    return AsyncAgentVectorDBStore(db_path=unique_test_db_path)
 
 @pytest.fixture
-async def async_collection(async_store: AsyncAgentVectorStore, test_embedding_function) -> AsyncAgentMemoryCollection:
+async def async_collection(async_store: AsyncAgentVectorDBStore, test_embedding_function) -> AsyncAgentMemoryCollection:
     """Provides a default, clean AsyncAgentMemoryCollection."""
     return await async_store.get_or_create_collection(
         name="default_async_collection",
@@ -88,7 +88,7 @@ async def async_collection(async_store: AsyncAgentVectorStore, test_embedding_fu
     )
 
 @pytest.fixture
-async def async_collection_ts_update(async_store: AsyncAgentVectorStore, test_embedding_function) -> AsyncAgentMemoryCollection:
+async def async_collection_ts_update(async_store: AsyncAgentVectorDBStore, test_embedding_function) -> AsyncAgentMemoryCollection:
     """Provides an async collection with timestamp_last_accessed updates enabled."""
     return await async_store.get_or_create_collection(
         name="async_collection_ts",

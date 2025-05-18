@@ -4,9 +4,9 @@ import time
 import os
 from typing import List, Dict, Tuple
 
-from agentvector import AgentMemory, AsyncAgentMemory
-from agentvector.exceptions import InitializationError, SchemaError, QueryError, OperationError, EmbeddingError
-from agentvector.schemas import MemoryEntrySchema # Assuming MemoryEntrySchema is the base
+from agentvectordb import AgentMemory, AsyncAgentMemory
+from agentvectordb.exceptions import InitializationError, SchemaError, QueryError, OperationError, EmbeddingError
+from agentvectordb.schemas import MemoryEntrySchema # Assuming MemoryEntrySchema is the base
 from .conftest import VECTOR_DIMENSION_TEST, MyCustomTestSchema # Import from conftest
 
 # Helper to generate multiple unique vectors for testing distinctness

@@ -23,4 +23,4 @@ A clear and concise description of what you expected to happen.
 **Environment:**
  - OS: [e.g. macOS]
  - Python version:
- - AgentVector version:
+ - AgentVectorDB version:

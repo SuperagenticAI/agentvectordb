@@ -1,14 +1,14 @@
 import os
 import shutil
-from agentvector import AgentVectorStore
-from agentvector.embeddings import DefaultTextEmbeddingFunction
+from agentvectordb import AgentVectorDBStore
+from agentvectordb.embeddings import DefaultTextEmbeddingFunction
 
 print("\033[1;36m")
-print("🧠🧹 AgentVector Prune & Count Example 🧹🧠")
+print("🧠🧹 AgentVectorDB Prune & Count Example 🧹🧠")
 print("Demonstrating memory pruning and counting.\n")
 print("\033[0m")
 
-DB_DIR = "./_agentvector_prune_db"
+DB_DIR = "./_agentvectordb_prune_db"
 ef = DefaultTextEmbeddingFunction(dimension=64)
 
 def cleanup_db_dir(db_directory):
@@ -18,7 +18,7 @@ def cleanup_db_dir(db_directory):
 
 cleanup_db_dir(DB_DIR)
 
-store = AgentVectorStore(db_path=DB_DIR)
+store = AgentVectorDBStore(db_path=DB_DIR)
 memories = store.get_or_create_collection(
     name="prune_memories",
     embedding_function=ef,

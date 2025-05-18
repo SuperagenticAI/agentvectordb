@@ -1,17 +1,17 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="agentvector",
+    name="agentvectordb",
     version="0.0.1",
     author="Shashi Jagtap",
     author_email="shashi@super-agentic.ai",
-    description="AgentVector: The Cognitive Core for Your AI Agents. A lightweight, embeddable vector database for Agentic AI systems, built on LanceDB.",
+    description="AgentVectorDB: The Cognitive Core for Your AI Agents. A lightweight, embeddable vector database for Agentic AI systems, built on LanceDB.",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
-    url="https://github.com/superagenticai/agentvector",
+    url="https://github.com/superagenticai/agentvectordb",
     project_urls={
-        "Homepage": "https://github.com/superagenticai/agentvector",
-        "Repository": "https://github.com/superagenticai/agentvector",
+        "Homepage": "https://github.com/superagenticai/agentvectordb",
+        "Repository": "https://github.com/superagenticai/agentvectordb",
     },
     packages=find_packages(exclude=["docs.*", "docs", "examples.*", "examples", "tests.*", "tests"]),
     classifiers=[
@@ -32,7 +32,7 @@ setup(
     python_requires=">=3.8",
     install_requires=[
         "lancedb",
-        "pylance"
+        "pylance",
         "pandas",
         "pydantic>=2.0",
         "numpy",

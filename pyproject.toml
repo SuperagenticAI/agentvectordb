@@ -3,20 +3,19 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "agentvector"
-version = "0.0.1" # MVP with Store/Collection
+name = "agentvectordb"
+version = "0.0.1"
 authors = [
     { name = "Shashi Jagtap", email = "shashi@super-agentic.ai" },
 ]
-description = "AgentVector: The Cognitive Core for Your AI Agents. A lightweight, embeddable vector database for Agentic AI systems, built on LanceDB."
+description = "AgentVectorDB: The Cognitive Core for Your AI Agents. A lightweight, embeddable vector database for Agentic AI systems, built on LanceDB."
 readme = "README.md"
-license = { file = "LICENSE" }
+license = "Apache-2.0"
 requires-python = ">=3.8"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research", 
-    "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
@@ -29,11 +28,10 @@ classifiers = [
 ]
 dependencies = [
     "lancedb",
-    "pylance",
     "pandas",
     "pydantic>=2.0",
     "numpy",
-    "pyarrow>=12.0.1",  # Added pyarrow dependency
+    "pyarrow>=12.0.1",
     "tantivy"
 ]
 
@@ -46,16 +44,16 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/superagenticai/agentvector" 
-Repository = "https://github.com/superagenticai/agentvector" 
+Homepage = "https://github.com/superagenticai/agentvectordb" 
+Repository = "https://github.com/superagenticai/agentvectordb" 
 
 [tool.setuptools]
-packages = ["agentvector"] # Ensure this correctly lists your package
+packages = ["agentvectordb"] # Ensure this correctly lists your package
 
 [tool.pytest.ini_options]
-pythonpath = [".", "agentvector"] # Add current dir and package dir to pythonpath for tests
+pythonpath = [".", "agentvectordb"] # Add current dir and package dir to pythonpath for tests
 testpaths = ["tests"]
-addopts = "--cov=agentvector --cov-report=term-missing -p no:warnings"
+addopts = "--cov=agentvectordb --cov-report=term-missing -p no:warnings"
 asyncio_mode = "auto"
 
 [tool.ruff]
@@ -79,4 +77,4 @@ exclude = [
 "__init__.py" = ["F401"]
 
 [tool.ruff.isort]
-known-first-party = ["agentvector"]
+known-first-party = ["agentvectordb"]
