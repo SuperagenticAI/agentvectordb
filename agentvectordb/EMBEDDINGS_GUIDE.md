@@ -78,8 +78,8 @@ These models run on your own infrastructure, giving you data privacy and control
     from sentence_transformers import SentenceTransformer # pip install sentence-transformers
 
     class CustomBGEWrapper(BaseEmbeddingFunction):
-        def __init__(self, model_name="BAAI/bge-base-en-v1.5", 
-                     doc_instruction="", 
+        def __init__(self, model_name="BAAI/bge-base-en-v1.5",
+                     doc_instruction="",
                      query_instruction="Represent this query for retrieving relevant documents: "):
             self.model = SentenceTransformer(model_name)
             self.doc_instruction = doc_instruction
@@ -97,13 +97,13 @@ These models run on your own infrastructure, giving you data privacy and control
             # This simple wrapper assumes `is_query` might be passed by a modified query method.
             # LanceDB's default EF integration might not pass `is_query`.
             # A more robust way is to have separate methods or ensure the query text is pre-formatted.
-            
+
             # For simple document embedding by LanceDB on add:
             if not is_query:
                  texts_to_embed = [self.doc_instruction + text for text in texts]
             else: # This part would be called manually when forming a query vector
                  texts_to_embed = [self.query_instruction + text for text in texts]
-            
+
             return self.model.encode(texts_to_embed, normalize_embeddings=True).tolist()
 
         # You would likely call this manually for queries:

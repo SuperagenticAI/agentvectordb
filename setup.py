@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 setup(
     name="agentvectordb",
@@ -44,6 +44,7 @@ setup(
             "pytest>=7.0.0",
             "pytest-cov",
             "pytest-asyncio",
+            "pre-commit",  # Added pre-commit as a dev dependency
         ],
     },
     include_package_data=True,

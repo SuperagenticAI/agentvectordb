@@ -1,13 +1,11 @@
-import os
-import lancedb
 import asyncio
-from typing import List, Optional, Type, Any, Dict
+from typing import Any, Dict, Optional, Type
 
-from .store import AgentVectorDBStore
+from .async_collection import AsyncAgentMemoryCollection
 from .collection import AgentMemoryCollection
 from .schemas import MemoryEntrySchema
-from .exceptions import InitializationError, OperationError
-from .async_collection import AsyncAgentMemoryCollection
+from .store import AgentVectorDBStore
+
 
 class AsyncAgentVectorDBStore:
     def __init__(self, db_path: str):
@@ -17,11 +15,13 @@ class AsyncAgentVectorDBStore:
         self._collections_cache: Dict[str, AgentMemoryCollection] = {}
 
     async def get_or_create_collection(
-        self, name: str, embedding_function: Optional[Any] = None,
+        self,
+        name: str,
+        embedding_function: Optional[Any] = None,
         base_schema: Type[MemoryEntrySchema] = MemoryEntrySchema,
         vector_dimension: Optional[int] = None,
         update_last_accessed_on_query: bool = False,
-        recreate: bool = False
+        recreate: bool = False,
     ) -> "AsyncAgentMemoryCollection":
         # Always use the sync store's get_or_create_collection, which creates if needed
         sync_collection = await asyncio.to_thread(
@@ -31,9 +31,10 @@ class AsyncAgentVectorDBStore:
             base_schema=base_schema,
             vector_dimension=vector_dimension,
             update_last_accessed_on_query=update_last_accessed_on_query,
-            recreate=recreate
+            recreate=recreate,
         )
         from .async_collection import AsyncAgentMemoryCollection
+
         return AsyncAgentMemoryCollection(sync_collection)
 
     def get_collection(self, name: str) -> Optional[AgentMemoryCollection]:
@@ -44,12 +45,14 @@ class AsyncAgentVectorDBStore:
         # Users should use get_or_create_collection to ensure consistent configuration.
         if name in self._collections_cache:
             return self._collections_cache[name]
-        
+
         # If it's in DB but not cache, what EF/schema was it created with? We don't know.
         # So, for MVP, we won't try to auto-rehydrate with guessed params.
         if name in self.db.table_names():
-            print(f"Warning: Collection '{name}' exists in DB but was not created in this Store session. "
-                  f"Use get_or_create_collection with original parameters to access it.")
+            print(
+                f"Warning: Collection '{name}' exists in DB but was not created in this Store session. "
+                f"Use get_or_create_collection with original parameters to access it."
+            )
         return None
 
     async def list_collections(self) -> list[str]:
@@ -71,11 +74,7 @@ class AsyncAgentVectorDBStore:
         # After you create the table (table = self.db.create_table(...))
         if table.count_rows() >= 2:
             try:
-                table.create_index(
-                    vector_column_name="vector",
-                    index_type="IVF_FLAT",
-                    num_partitions=2
-                )
+                table.create_index(vector_column_name="vector", index_type="IVF_FLAT", num_partitions=2)
             except Exception as e:
                 print(f"Warning: Could not create vector index: {e}")
         else:

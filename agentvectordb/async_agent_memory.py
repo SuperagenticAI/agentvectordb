@@ -1,8 +1,7 @@
 import asyncio
-from typing import List, Dict, Any, Optional, Callable, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
-from .agent_memory import AgentMemory # The synchronous class
-from .schemas import MemoryEntrySchema # For type hints
+from .agent_memory import AgentMemory  # The synchronous class
 
 
 class AsyncAgentMemory:
@@ -10,6 +9,7 @@ class AsyncAgentMemory:
     Asynchronous wrapper for AgentMemory, using asyncio.to_thread for non-blocking operations.
     This makes AgentVectorDB compatible with async-first agent frameworks.
     """
+
     def __init__(self, sync_memory_instance: AgentMemory):
         """
         Initializes AsyncAgentMemory.
@@ -30,9 +30,9 @@ class AsyncAgentMemory:
     def table_name(self) -> str:
         """Name of the table used for memories."""
         return self._sync_memory.table_name
-    
+
     @property
-    def table(self): # Access to underlying LanceTable, if needed (use with caution in async)
+    def table(self):  # Access to underlying LanceTable, if needed (use with caution in async)
         """Direct access to the underlying LanceDB Table object. Use with caution in async contexts."""
         return self._sync_memory.table
 
@@ -70,7 +70,7 @@ class AsyncAgentMemory:
     async def reflect_and_summarize(
         self,
         summarization_callback: Callable[[List[Dict], str], Tuple[str, List[float]]],
-        **kwargs: Any # All other args for reflect_and_summarize
+        **kwargs: Any,  # All other args for reflect_and_summarize
     ) -> Optional[str]:
         """
         Asynchronously facilitates agent reflection and summarization.
@@ -85,8 +85,8 @@ class AsyncAgentMemory:
         # For most CPU-bound or simple I/O callbacks, this should be fine.
         return await asyncio.to_thread(
             self._sync_memory.reflect_and_summarize,
-            summarization_callback=summarization_callback, # Pass callback explicitly
-            **kwargs
+            summarization_callback=summarization_callback,  # Pass callback explicitly
+            **kwargs,
         )
 
     async def list_tables(self) -> List[str]:
