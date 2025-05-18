@@ -1,0 +1,18 @@
+{
+  "index": "Introduction",
+  "getting-started": "Getting Started",
+  "concepts": "Core Concepts",
+  "guides": "Guides",
+  "api-reference": "API Reference",
+  "examples": "Examples",
+  "about": {
+    "title": "About",
+    "type": "page"
+  },
+  "github": {
+    "title": "GitHub",
+    "type": "page",
+    "href": "https://github.com/yourusername/agentvector",
+    "newWindow": true
+  }
+}

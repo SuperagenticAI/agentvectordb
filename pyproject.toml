@@ -1,0 +1,78 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agentvector"
+version = "0.0.1" # MVP with Store/Collection
+authors = [
+    { name = "Shashi Jagtap", email = "shashi@super-agentic.ai" },
+]
+description = "AgentVector: The Cognitive Core for Your AI Agents. A lightweight, embeddable vector database for Agentic AI systems, built on LanceDB."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.8"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research", 
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Database",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "lancedb>=0.6.0",
+    "pydantic>=2.0",
+    "numpy",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov",
+    "pytest-asyncio",
+    # "sentence-transformers", # For more realistic embedding tests
+]
+
+[project.urls]
+Homepage = "https://github.com/superagenticai/agentvector" 
+Repository = "https://github.com/superagenticai/agentvector" 
+
+[tool.setuptools]
+packages = ["agentvector"] # Ensure this correctly lists your package
+
+[tool.pytest.ini_options]
+pythonpath = [".", "agentvector"] # Add current dir and package dir to pythonpath for tests
+testpaths = ["tests"]
+addopts = "--cov=agentvector --cov-report=term-missing -p no:warnings"
+asyncio_mode = "auto"
+
+[tool.ruff]
+select = ["E", "F", "B", "I", "W"]
+ignore = ["E501"]
+line-length = 120
+target-version = "py38"
+fix = true
+exclude = [
+    ".git",
+    ".venv",
+    "venv",
+    "docs/*",
+    "examples/*",
+    "__pycache__",
+    "build",
+    "dist"
+]
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.ruff.isort]
+known-first-party = ["agentvector"]
