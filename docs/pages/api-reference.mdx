@@ -1,15 +1,221 @@
-# 🛠️ API Reference
+# 🛠 API Reference
 
-## AgentVectorDBStore
+## Store Classes
 
-- `get_or_create_collection(name, ...)`
-- `list_collections()`
-- `delete_collection(name)`
+### AgentVectorDBStore
 
-## AgentMemoryCollection
+The main synchronous store class for managing vector collections.
 
-- `add(content, type, importance_score, metadata)`
-- `query(query_text, k, filter_sql)`
+```python
+from agentvectordb import AgentVectorDBStore
+
+store = AgentVectorDBStore(
+    db_path: str = "./vector_db",
+    create_if_missing: bool = True
+)
+```
+
+#### Parameters
+- `db_path`: Path to the database directory
+- `create_if_missing`: Create directory if it doesn't exist
+
+#### Methods
+
+##### `get_or_create_collection`
+```python
+def get_or_create_collection(
+    name: str,
+    embedding_function: Optional[BaseEmbeddingFunction] = None,
+    recreate: bool = False
+) -> AgentMemoryCollection
+```
+
+##### `list_collections`
+```python
+def list_collections() -> List[str]
+```
+
+##### `delete_collection`
+```python
+def delete_collection(name: str) -> bool
+```
+
+### AsyncAgentVectorDBStore
+
+Asynchronous version of the store class.
+
+```python
+from agentvectordb import AsyncAgentVectorDBStore
+
+store = AsyncAgentVectorDBStore(
+    db_path: str = "./vector_db",
+    create_if_missing: bool = True
+)
+```
+
+#### Methods
+
+##### `get_or_create_collection`
+```python
+async def get_or_create_collection(
+    name: str,
+    embedding_function: Optional[BaseEmbeddingFunction] = None,
+    recreate: bool = False
+) -> AsyncAgentMemoryCollection
+```
+
+## Collection Classes
+
+### AgentMemoryCollection
+
+Manages a collection of agent memories.
+
+```python
+collection = store.get_or_create_collection("memories")
+```
+
+#### Methods
+
+##### `add`
+```python
+def add(
+    content: str,
+    type: str = "memory",
+    importance_score: float = 0.5,
+    metadata: Optional[Dict[str, Any]] = None
+) -> Dict[str, Any]
+```
+
+##### `query`
+```python
+def query(
+    query_text: str,
+    k: int = 5,
+    filter_sql: Optional[str] = None
+) -> List[Dict[str, Any]]
+```
+
+##### `delete`
+```python
+def delete(filter_sql: str) -> bool
+```
+
+##### `update`
+```python
+def update(
+    filter_sql: str,
+    updates: Dict[str, Any]
+) -> bool
+```
+
+### AsyncAgentMemoryCollection
+
+Asynchronous version of the collection class.
+
+```python
+collection = await store.get_or_create_collection("memories")
+```
+
+#### Methods
+
+##### `add`
+```python
+async def add(
+    content: str,
+    type: str = "memory",
+    importance_score: float = 0.5,
+    metadata: Optional[Dict[str, Any]] = None
+) -> Dict[str, Any]
+```
+
+## Embedding Functions
+
+### BaseEmbeddingFunction
+
+Base class for implementing custom embedding functions.
+
+```python
+from agentvectordb.embeddings import BaseEmbeddingFunction
+
+class CustomEmbedder(BaseEmbeddingFunction):
+    def __init__(self):
+        super().__init__(dimension=384)
+    
+    def embed(self, texts: List[str]) -> np.ndarray:
+        # Implementation here
+        pass
+```
+
+### DefaultTextEmbeddingFunction
+
+Built-in embedding function for text.
+
+```python
+from agentvectordb.embeddings import DefaultTextEmbeddingFunction
+
+embedder = DefaultTextEmbeddingFunction(dimension=64)
+```
+
+## Schemas
+
+### MemoryEntrySchema
+
+Default schema for memory entries.
+
+```python
+from agentvectordb.schemas import MemoryEntrySchema
+
+schema = MemoryEntrySchema(
+    vector_dimension=384,
+    additional_fields={
+        "category": str,
+        "tags": List[str]
+    }
+)
+```
+
+## Exceptions
+
+### AgentVectorException
+Base exception class for all AgentVectorDB errors.
+
+### Common Exceptions
+```python
+from agentvectordb.exceptions import (
+    InitializationError,  # Database initialization failed
+    SchemaError,         # Invalid schema definition
+    QueryError,          # Invalid query parameters
+    OperationError,      # Operation failed
+    EmbeddingError      # Embedding generation failed
+)
+```
+
+## Utils
+
+### Configuration
+
+```python
+from agentvectordb.utils import configure_logging
+
+configure_logging(level="DEBUG")
+```
+
+### Type Definitions
+
+```python
+from agentvectordb.types import (
+    MemoryEntry,
+    QueryResult,
+    EmbeddingVector,
+    MetadataDict
+)
+```
+
+> [!note]
+> All async methods should be called with `await` and used within an async context.
+
+> [!warning]
+> The `recreate` parameter in `get_or_create_collection` will delete existing collections!
 
 > [!tip]
-> See full docstrings in the code for parameter details.
+> Use type hints and proper exception handling for better code reliability.

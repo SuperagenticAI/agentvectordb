@@ -1,17 +1,40 @@
 {
-  "index": "Introduction",
-  "getting-started": "Getting Started",
-  "concepts": "Core Concepts",
-  "guides": "Guides",
-  "api-reference": "API Reference",
-  "examples": "Examples",
-  "faq": "FAQ",
+  "index": {
+    "title": "🏠 Home",
+    "theme": {
+      "layout": "full"
+    }
+  },
+  "getting-started": {
+    "title": "🚀 Getting Started"
+  },
+  "concepts": {
+    "title": "💡 Core Concepts"
+  },
+  "guides": {
+    "title": "📖 Guides"
+  },
+  "api-reference": {
+    "title": "🛠️ API Reference"
+  },
+  "examples": {
+    "title": "🧪 Examples"
+  },
+  "deployment": {
+    "title": "🌐 Deployment"
+  },
+  "faq": {
+    "title": "❓ FAQ"
+  },
+  "community": {
+    "title": "👥 Community"
+  },
   "about": {
-    "title": "About",
+    "title": "ℹ️ About",
     "type": "page"
   },
   "github": {
-    "title": "GitHub",
+    "title": "GitHub ↗",
     "type": "page",
     "href": "https://github.com/superagenticai/agentvectordb",
     "newWindow": true

@@ -1,16 +1,136 @@
 # 💡 Core Concepts
 
-## Collections
+## Vector Database Fundamentals
 
-A **Collection** is a logical grouping of agent memories (documents, thoughts, etc).
+### What is a Vector Database?
+Vector databases store and manage high-dimensional vectors, enabling semantic search and similarity matching. In AgentVectorDB, these vectors represent agent memories, thoughts, and knowledge.
 
-## Memory Entries
+### Embeddings
+Embeddings are numerical representations of data (text, images, etc.) that capture semantic meaning. AgentVectorDB uses embeddings to:
+- Store memories efficiently
+- Enable semantic search
+- Find similar content
 
-Each entry stores content, type, importance, and metadata.
+## Key Components
 
-## Embeddings
+### 🏪 Stores
+A Store in AgentVectorDB is the main entry point for:
+- Managing collections
+- Handling database connections
+- Coordinating operations
 
-AgentVectorDB supports pluggable embedding functions for semantic search.
+```python
+from agentvectordb import AgentVectorDBStore
 
-> [!info]
-> You can use any embedding model compatible with your agent framework.
+store = AgentVectorDBStore(db_path="./my_db")
+```
+
+### 📚 Collections
+Collections organize related memories and provide:
+- Consistent schema enforcement
+- Optimized retrieval
+- Metadata management
+
+```python
+collection = store.get_or_create_collection(
+    name="agent_memories",
+    embedding_function=my_embedder
+)
+```
+
+### 🧠 Memory Entries
+Each memory entry contains:
+- Content (the actual information)
+- Type (categorization)
+- Importance score
+- Metadata (additional context)
+- Embedding vector
+
+```python
+collection.add(
+    content="Important observation",
+    type="observation",
+    importance_score=0.9,
+    metadata={"context": "meeting"}
+)
+```
+
+## Advanced Concepts
+
+### Embedding Functions
+Custom embedding functions can be implemented:
+
+```python
+from agentvectordb.embeddings import BaseEmbeddingFunction
+
+class CustomEmbedder(BaseEmbeddingFunction):
+    def __init__(self):
+        super().__init__(dimension=384)
+    
+    def embed(self, texts):
+        # Your embedding logic here
+        return vectors
+```
+
+### Async Operations
+Async support for high-performance applications:
+
+```python
+from agentvectordb import AsyncAgentVectorDBStore
+
+async def main():
+    store = AsyncAgentVectorDBStore()
+    collection = await store.get_or_create_collection("async_memories")
+    await collection.add(content="Async thought")
+```
+
+### Memory Management
+AgentVectorDB provides several memory management features:
+
+#### Importance Scoring
+```python
+collection.add(
+    content="Critical insight",
+    importance_score=1.0  # Highest importance
+)
+```
+
+#### Memory Types
+```python
+collection.add(
+    content="Task completed",
+    type="status_update"
+)
+```
+
+#### Metadata
+```python
+collection.add(
+    content="Meeting notes",
+    metadata={
+        "date": "2025-05-18",
+        "participants": ["Alice", "Bob"],
+        "project": "Nebula"
+    }
+)
+```
+
+## Best Practices
+
+### 1. Collection Organization
+- Group related memories in collections
+- Use consistent naming conventions
+- Keep collections focused and specific
+
+### 2. Memory Structure
+- Include relevant metadata
+- Set appropriate importance scores
+- Use descriptive memory types
+
+### 3. Query Optimization
+- Use specific queries
+- Filter results effectively
+- Balance precision and recall
+
+> [!tip]
+> Check the [Guides](guides) section for detailed implementation examples!

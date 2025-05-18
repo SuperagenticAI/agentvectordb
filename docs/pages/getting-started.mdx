@@ -1,4 +1,141 @@
-# Getting Started
+# 🚀 Getting Started
 
-Welcome to AgentVectorDB!  
-See the docs for installation and usage.
+## Prerequisites
+
+Before installing AgentVectorDB, ensure you have:
+
+- Python 3.8 or higher installed
+- pip (Python package installer)
+- Basic understanding of vector databases and embeddings
+
+> [!tip]
+> Not sure about your Python version? Run `python --version` in your terminal.
+
+## Installation
+
+### 1. Install Python (if needed)
+
+#### On macOS
+```bash
+brew install python@3.11
+```
+
+#### On Ubuntu/Debian
+
+```bash
+sudo apt update
+sudo apt install python3.11 python3-pip
+```
+
+#### On Windows
+
+Download Python from python.org or use:
+
+```bash
+winget install Python.Python.3.11
+```
+
+
+##  Create a Virtual Environment
+
+
+```bash
+
+# Create a new directory for your project
+mkdir my-agent-project
+cd my-agent-project
+
+# Create a virtual environment
+python -m venv venv
+
+# Activate the virtual environment
+# On Windows:
+venv\Scripts\activate
+# On macOS/Linux:
+source venv/bin/activate
+
+```
+## Install AgentVectorDB
+
+```bash 
+pip install agentvectordb
+```
+
+##  Quick Example
+Here's a minimal example to get you started:
+
+```python
+from agentvectordb import AgentVectorDBStore
+from agentvectordb.embeddings import DefaultTextEmbeddingFunction
+
+# Initialize the store
+store = AgentVectorDBStore(db_path="./my_agent_db")
+
+# Create a collection with default embedding function
+collection = store.get_or_create_collection(
+    name="agent_thoughts",
+    embedding_function=DefaultTextEmbeddingFunction(dimension=64)
+)
+
+# Add a memory
+collection.add(
+    content="The sky is blue because of Rayleigh scattering.",
+    type="scientific_fact",
+    importance_score=0.8,
+    metadata={"domain": "physics", "confidence": "high"}
+)
+
+# Query memories
+results = collection.query(
+    query_text="Why is the sky blue?",
+    k=1
+)
+
+# Print results
+for result in results:
+    print(f"Content: {result['content']}")
+    print(f"Type: {result['type']}")
+    print(f"Importance: {result['importance_score']}")
+
+```
+##  Async Support
+AgentVectorDB also provides async APIs for use with async frameworks:
+
+```python
+import asyncio
+from agentvectordb import AsyncAgentVectorDBStore
+
+async def main():
+    store = AsyncAgentVectorDBStore(db_path="./my_async_db")
+    collection = await store.get_or_create_collection("async_memories")
+    
+    # Add memory asynchronously
+    await collection.add(
+        content="Processing data asynchronously",
+        type="system_log"
+    )
+
+    # Query asynchronously
+    results = await collection.query(
+        query_text="async processing",
+        k=1
+    )
+    
+    print(results)
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+## Next Steps
+
+Explore Core Concepts to understand AgentVectorDB's architecture
+Check out the Guides for detailed usage instructions
+See Examples for more code samples
+Read the API Reference for detailed documentation
+
+[!important] Remember to always activate your virtual environment before running Python scripts:
+
+```bash
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```

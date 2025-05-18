@@ -1,24 +1,227 @@
-# 🧑‍💻 Example Usage
+# 🧪 Examples
 
-## Logging Agent Thoughts
+## Basic Usage Examples
+
+### Creating a Simple Memory Store
 
 ```python
 from agentvectordb import AgentVectorDBStore
+from agentvectordb.embeddings import DefaultTextEmbeddingFunction
 
-store = AgentVectorDBStore(db_path="./db")
-collection = store.get_or_create_collection("thoughts")
-collection.add(content="Agent is reflecting.", type="reflection", importance_score=0.8)
+# Initialize store with default settings
+store = AgentVectorDBStore(
+    db_path="./agent_memories",
+    create_if_missing=True
+)
+
+# Create a collection for agent thoughts
+thoughts = store.get_or_create_collection(
+    name="agent_thoughts",
+    embedding_function=DefaultTextEmbeddingFunction(dimension=384)
+)
+
+# Add some memories
+thoughts.add(
+    content="The sky appears blue due to Rayleigh scattering",
+    type="scientific_fact",
+    importance_score=0.8,
+    metadata={
+        "domain": "physics",
+        "confidence": "high",
+        "tags": ["science", "optics"]
+    }
+)
+
+# Query the memories
+results = thoughts.query(
+    query_text="Why is the sky blue?",
+    k=1
+)
+
+for result in results:
+    print(f"Found: {result['content']}")
+    print(f"Importance: {result['importance_score']}")
 ```
 
----
-
-## Async Example
+### Async Operations
 
 ```python
+import asyncio
 from agentvectordb import AsyncAgentVectorDBStore
 
-async def async_example():
-    store = AsyncAgentVectorDBStore(db_path="./db")
-    collection = await store.get_or_create_collection("thoughts")
-    await collection.add(content="Async agent thought.", type="reflection", importance_score=0.8)
+async def manage_memories():
+    # Initialize async store
+    store = AsyncAgentVectorDBStore(db_path="./async_memories")
+    
+    # Create async collection
+    memories = await store.get_or_create_collection("agent_memories")
+    
+    # Add memories asynchronously
+    await memories.add(
+        content="Planning next action sequence",
+        type="planning",
+        importance_score=0.9,
+        metadata={"context": "task_execution"}
+    )
+    
+    # Query memories
+    results = await memories.query(
+        query_text="action planning",
+        k=2
+    )
+    
+    return results
+
+# Run the async example
+async def main():
+    results = await manage_memories()
+    print(results)
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
+
+## Advanced Examples
+
+### Custom Embedding Function
+
+```python
+from agentvectordb.embeddings import BaseEmbeddingFunction
+import numpy as np
+from transformers import AutoTokenizer, AutoModel
+
+class TransformerEmbedding(BaseEmbeddingFunction):
+    def __init__(self, model_name="bert-base-uncased"):
+        super().__init__(dimension=768)  # BERT base dimension
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        self.model = AutoModel.from_pretrained(model_name)
+    
+    def embed(self, texts):
+        # Tokenize texts
+        inputs = self.tokenizer(
+            texts,
+            padding=True,
+            truncation=True,
+            return_tensors="pt"
+        )
+        
+        # Generate embeddings
+        outputs = self.model(**inputs)
+        embeddings = outputs.last_hidden_state[:, 0, :].detach().numpy()
+        
+        return embeddings
+
+# Use custom embedder
+store = AgentVectorDBStore()
+collection = store.get_or_create_collection(
+    name="semantic_memories",
+    embedding_function=TransformerEmbedding()
+)
+```
+
+### Memory Management System
+
+```python
+class AgentMemoryManager:
+    def __init__(self, db_path="./agent_memory_system"):
+        self.store = AgentVectorDBStore(db_path=db_path)
+        self.collections = {
+            "thoughts": self.store.get_or_create_collection("thoughts"),
+            "observations": self.store.get_or_create_collection("observations"),
+            "plans": self.store.get_or_create_collection("plans")
+        }
+    
+    def add_thought(self, content, importance=0.5):
+        return self.collections["thoughts"].add(
+            content=content,
+            type="thought",
+            importance_score=importance,
+            metadata={"timestamp": str(datetime.now())}
+        )
+    
+    def add_observation(self, content, importance=0.7):
+        return self.collections["observations"].add(
+            content=content,
+            type="observation",
+            importance_score=importance
+        )
+    
+    def query_memories(self, query, collection_name="thoughts", k=5):
+        return self.collections[collection_name].query(
+            query_text=query,
+            k=k
+        )
+
+# Usage example
+memory_manager = AgentMemoryManager()
+memory_manager.add_thought("Need to optimize task sequence")
+memory_manager.add_observation("User seems frustrated")
+results = memory_manager.query_memories("task optimization")
+```
+
+### Working with Metadata and Filtering
+
+```python
+# Add memories with rich metadata
+collection.add(
+    content="Meeting with team about project timeline",
+    type="meeting_note",
+    importance_score=0.8,
+    metadata={
+        "project": "AgentX",
+        "participants": ["Alice", "Bob"],
+        "date": "2025-05-18",
+        "topics": ["planning", "timeline"],
+        "decisions": ["extend_deadline", "add_resources"]
+    }
+)
+
+# Query with SQL filter
+results = collection.query(
+    query_text="project timeline",
+    k=5,
+    filter_sql="metadata.project = 'AgentX' AND importance_score > 0.7"
+)
+```
+
+## Integration Examples
+
+### FastAPI Integration
+
+```python
+from fastapi import FastAPI
+from pydantic import BaseModel
+from agentvectordb import AgentVectorDBStore
+
+app = FastAPI()
+store = AgentVectorDBStore()
+memories = store.get_or_create_collection("api_memories")
+
+class Memory(BaseModel):
+    content: str
+    importance: float = 0.5
+    metadata: dict = {}
+
+@app.post("/memories/")
+async def create_memory(memory: Memory):
+    result = memories.add(
+        content=memory.content,
+        importance_score=memory.importance,
+        metadata=memory.metadata
+    )
+    return result
+
+@app.get("/memories/search/")
+async def search_memories(query: str, limit: int = 5):
+    results = memories.query(
+        query_text=query,
+        k=limit
+    )
+    return results
+```
+
+> [!tip]
+> Check the [API Reference](api-reference) for detailed parameter descriptions.
+
+> [!note]
+> Remember to handle exceptions appropriately in production code.
