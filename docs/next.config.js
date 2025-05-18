@@ -1,10 +1,10 @@
-import nextra from 'nextra'
+import nextra from 'nextra';
 
-const withNextra = require('nextra')({
+const withNextra = nextra({
   theme: 'nextra-theme-docs',
   themeConfig: './theme.config.jsx',
   defaultShowCopyCode: true,
   codeHighlight: true
-})
+});
 
-module.exports = withNextra()
+export default withNextra;

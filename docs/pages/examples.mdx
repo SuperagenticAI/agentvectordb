@@ -1,0 +1,24 @@
+# 🧑‍💻 Example Usage
+
+## Logging Agent Thoughts
+
+```python
+from agentvectordb import AgentVectorDBStore
+
+store = AgentVectorDBStore(db_path="./db")
+collection = store.get_or_create_collection("thoughts")
+collection.add(content="Agent is reflecting.", type="reflection", importance_score=0.8)
+```
+
+---
+
+## Async Example
+
+```python
+from agentvectordb import AsyncAgentVectorDBStore
+
+async def async_example():
+    store = AsyncAgentVectorDBStore(db_path="./db")
+    collection = await store.get_or_create_collection("thoughts")
+    await collection.add(content="Async agent thought.", type="reflection", importance_score=0.8)
+```

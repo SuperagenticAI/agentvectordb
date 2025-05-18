@@ -1,0 +1,27 @@
+# 📖 Usage Guides
+
+## Synchronous API
+
+```python
+from agentvectordb import AgentVectorDBStore
+
+store = AgentVectorDBStore(db_path="./db")
+collection = store.get_or_create_collection("my_collection")
+collection.add(content="Hello, world!", type="note", importance_score=0.5)
+```
+
+---
+
+## Asynchronous API
+
+```python
+from agentvectordb import AsyncAgentVectorDBStore
+
+async def main():
+    store = AsyncAgentVectorDBStore(db_path="./db")
+    collection = await store.get_or_create_collection("my_collection")
+    await collection.add(content="Async note", type="note", importance_score=0.7)
+```
+
+> [!warning]
+> Don't forget to use `await` with the async API!

@@ -1,9 +1,12 @@
 export default {
-  logo: <span>AgentVectorDB 🧠</span>,
+  logo: <span>🧠 AgentVectorDB Docs</span>,
   project: {
-    link: 'https://github.com/yourusername/agentvectordb'
+    link: 'https://github.com/superagenticai/agentvectordb'
   },
-  docsRepositoryBase: 'https://github.com/yourusername/agentvectordb/tree/main/docs',
+  docsRepositoryBase: 'https://github.com/superagenticai/agentvectordb/tree/main/docs/pages',
+  footer: {
+    text: 'AgentVectorDB Docs © ' + new Date().getFullYear()
+  },
   useNextSeoProps() {
     return {
       titleTemplate: '%s – AgentVectorDB'
