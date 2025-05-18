@@ -20,15 +20,11 @@
   "examples": {
     "title": "🧪 Examples"
   },
-  "deployment": {
-    "title": "🌐 Deployment"
-  },
+
   "faq": {
     "title": "❓ FAQ"
   },
-  "community": {
-    "title": "👥 Community"
-  },
+
   "about": {
     "title": "ℹ️ About",
     "type": "page"

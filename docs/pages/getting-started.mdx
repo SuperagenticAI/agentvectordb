@@ -64,39 +64,11 @@ pip install agentvectordb
 ##  Quick Example
 Here's a minimal example to get you started:
 
-```python
+```python filename="quickstart.py"
 from agentvectordb import AgentVectorDBStore
-from agentvectordb.embeddings import DefaultTextEmbeddingFunction
 
-# Initialize the store
-store = AgentVectorDBStore(db_path="./my_agent_db")
-
-# Create a collection with default embedding function
-collection = store.get_or_create_collection(
-    name="agent_thoughts",
-    embedding_function=DefaultTextEmbeddingFunction(dimension=64)
-)
-
-# Add a memory
-collection.add(
-    content="The sky is blue because of Rayleigh scattering.",
-    type="scientific_fact",
-    importance_score=0.8,
-    metadata={"domain": "physics", "confidence": "high"}
-)
-
-# Query memories
-results = collection.query(
-    query_text="Why is the sky blue?",
-    k=1
-)
-
-# Print results
-for result in results:
-    print(f"Content: {result['content']}")
-    print(f"Type: {result['type']}")
-    print(f"Importance: {result['importance_score']}")
-
+# Initialize store
+store = AgentVectorDBStore(db_path="./my_db")
 ```
 ##  Async Support
 AgentVectorDB also provides async APIs for use with async frameworks:
@@ -134,7 +106,7 @@ Check out the Guides for detailed usage instructions
 See Examples for more code samples
 Read the API Reference for detailed documentation
 
-[!important] Remember to always activate your virtual environment before running Python scripts:
+Remember to always activate your virtual environment before running Python scripts:
 
 ```bash
 source venv/bin/activate  # On Windows: venv\Scripts\activate

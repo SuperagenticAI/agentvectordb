@@ -4,15 +4,12 @@
 
 ### Creating a Simple Memory Store
 
-```python
+```python filename="memory_example.py"
 from agentvectordb import AgentVectorDBStore
 from agentvectordb.embeddings import DefaultTextEmbeddingFunction
 
-# Initialize store with default settings
-store = AgentVectorDBStore(
-    db_path="./agent_memories",
-    create_if_missing=True
-)
+# Initialize store
+store = AgentVectorDBStore()
 
 # Create a collection for agent thoughts
 thoughts = store.get_or_create_collection(
@@ -220,8 +217,6 @@ async def search_memories(query: str, limit: int = 5):
     return results
 ```
 
-> [!tip]
-> Check the [API Reference](api-reference) for detailed parameter descriptions.
+> **Tip**: Check the [API Reference](api-reference) for detailed parameter descriptions.
 
-> [!note]
-> Remember to handle exceptions appropriately in production code.
+> **Note**: Remember to handle exceptions appropriately in production code.

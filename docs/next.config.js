@@ -1,10 +1,12 @@
-import nextra from 'nextra';
+import nextra from 'nextra'
 
 const withNextra = nextra({
   theme: 'nextra-theme-docs',
   themeConfig: './theme.config.jsx',
   defaultShowCopyCode: true,
   codeHighlight: true
-});
+})
 
-export default withNextra;
+export default withNextra({
+  reactStrictMode: true,
+})
