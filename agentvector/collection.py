@@ -14,19 +14,21 @@ from .exceptions import (
 class AgentMemoryCollection:
     def __init__(
         self,
-        db_connection: lancedb.db.LanceDBConnection,
+        table: Any,  # LanceDB table instance
         name: str,
+        embedding_function: Optional[Any] = None,
         base_schema: Type[MemoryEntrySchema] = MemoryEntrySchema,
         vector_dimension: Optional[int] = None,
-        embedding_function: Optional[Any] = None,
-        update_last_accessed_on_query: bool = False,
-        recreate: bool = False
+        update_last_accessed_on_query: bool = False
     ):
-        if not db_connection:
-            raise InitializationError("db_connection (LanceDBConnection) must be provided.")
-        self.db = db_connection
+        if table is None:
+            raise InitializationError("table (LanceDB Table) must be provided.")
+            
+        self.table = table
         self.name = name
         self.embedding_function = embedding_function
+        self._schema = base_schema
+        self.vector_dimension = vector_dimension
         self.update_last_accessed_on_query = update_last_accessed_on_query
 
         self._vector_dimension = vector_dimension
@@ -49,68 +51,40 @@ class AgentMemoryCollection:
         self.BaseSchema = base_schema
         self.DynamicSchema = create_dynamic_memory_entry_schema(self.BaseSchema, self._vector_dimension)
 
-        if recreate and self.name in self.db.table_names():
-            try:
-                self.db.drop_table(self.name)
-                # print(f"Collection '{self.name}': Dropped existing table.") # Less verbose for tests
-            except Exception as e:
-                raise OperationError(f"Collection '{self.name}': Failed to drop table: {e}")
-
-        self.table: Optional[Table] = None
-        self._ensure_table_exists()
-
-    def _ensure_table_exists(self):
-        try:
-            if self.name not in self.db.table_names():
-                # print(f"Collection '{self.name}': Creating new table with schema {self.DynamicSchema.__name__}.") # Less verbose for tests
-                ef_config_list = None
-                if self.embedding_function:
-                    if hasattr(self.embedding_function, 'source_column') and \
-                       hasattr(self.embedding_function, 'generate') and \
-                       callable(self.embedding_function.source_column) and \
-                       callable(self.embedding_function.generate) :
-                        from lancedb.embeddings import EmbeddingFunctionConfig
-                        try:
-                            source_col_name = self.embedding_function.source_column()
-                            ef_config_list = [
-                                EmbeddingFunctionConfig(
-                                    source_column=source_col_name,
-                                    vector_column="vector",
-                                    function=self.embedding_function
-                                )
-                            ]
-                        except Exception as ef_conf_e:
-                             print(f"Warning: Collection '{self.name}': Could not create EmbeddingFunctionConfig. {ef_conf_e}")
-                    # else: # Less verbose for tests
-                        # print(f"Warning: Collection '{self.name}': EF may not be fully compatible with LanceDB auto-config.")
-                
-                self.table = self.db.create_table(
-                    self.name, schema=self.DynamicSchema,
-                    embedding_functions=ef_config_list, mode="create"
-                )
-            else:
-                self.table = self.db.open_table(self.name)
-        except Exception as e:
-            raise InitializationError(f"Collection '{self.name}': Failed to create/open table: {e}")
-
     @property
     def schema(self) -> Type[BaseModel]: return self.DynamicSchema
 
     def _prepare_data_for_add(self, data_dict: Dict[str, Any]) -> Dict[str, Any]:
-        if "id" not in data_dict or not data_dict["id"]: data_dict["id"] = str(uuid.uuid4())
-        if "timestamp_created" not in data_dict: data_dict["timestamp_created"] = time.time()
+        # Handle metadata
+        metadata = {
+            'source': data_dict.pop('source', ''),
+            'tags': data_dict.pop('tags', []),
+            'extra': '{}'
+        }
+        data_dict['metadata'] = metadata
 
-        if "vector" in data_dict and data_dict["vector"] is not None:
-            if len(data_dict["vector"]) != self._vector_dimension:
-                raise SchemaError(f"Col '{self.name}', ID '{data_dict['id']}': Vec dim mismatch.")
-        elif "vector" not in data_dict:
-            if not self.embedding_function:
-                raise EmbeddingError(f"Col '{self.name}', ID '{data_dict['id']}': No vector and no EF.")
-            source_col = getattr(self.embedding_function, 'source_column', lambda: 'content')()
-            if not data_dict.get(source_col):
-                 raise EmbeddingError(f"Col '{self.name}', ID '{data_dict['id']}': No vector & EF source ('{source_col}') missing.")
+        # Generate vector if needed
+        if self.embedding_function and 'content' in data_dict:
+            try:
+                data_dict['vector'] = self.embedding_function.generate([data_dict['content']])[0]
+            except Exception as e:
+                raise OperationError(f"Failed to generate embedding: {e}")
+
+        # Add timestamps as float
+        current_time = time.time()
+        data_dict.setdefault('created_at', current_time)
+        data_dict.setdefault('last_accessed_at', current_time)
+        
+        # Generate UUID if id not provided
+        data_dict.setdefault('id', str(uuid.uuid4()))
+        
+        # Set default values
+        data_dict.setdefault('type', '')
+        data_dict.setdefault('importance_score', 0.0)
+        
         try:
-            self.DynamicSchema.model_validate(data_dict)
+            validated_data = self._schema(**data_dict)
+            return validated_data.model_dump()
         except ValidationError as e:
             raise SchemaError(f"Col '{self.name}', ID '{data_dict.get('id', 'N/A')}': Validation failed: {e}")
         return data_dict
@@ -137,41 +111,51 @@ class AgentMemoryCollection:
             self.table.update(values={"timestamp_last_accessed": time.time()}, where=f"id IN ({ids_sql})")
         except Exception as e: print(f"Warn: Col '{self.name}': Failed timestamp update: {e}")
 
-    def query(self, query_vector: Optional[List[float]] = None, query_text: Optional[str] = None, k: int = 5,
-              filter_sql: Optional[str] = None, select_columns: Optional[List[str]] = None,
-              include_vector: bool = False) -> List[Dict[str, Any]]:
-        if not self.table: raise InitializationError(f"Col '{self.name}': Table not init.")
-        if query_vector is None and query_text is None: raise ValueError("Need query_vector or query_text.")
-        if query_vector is None and query_text and not self.embedding_function:
-            raise EmbeddingError(f"Col '{self.name}': query_text needs EF.")
-        if query_vector and len(query_vector) != self._vector_dimension:
-             raise SchemaError(f"Col '{self.name}': Query vec dim mismatch.")
-
-        search_obj = self.table.search(query=query_text, vector=query_vector).limit(k)
-        if filter_sql: search_obj = search_obj.where(filter_sql)
-        
-        actual_select = None
-        if select_columns:
-            actual_select = list(set(select_columns))
-            if include_vector and "vector" not in actual_select: actual_select.append("vector")
-        if actual_select: search_obj = search_obj.select(actual_select)
-
+    def query(
+        self,
+        query_text: Optional[str] = None,
+        query_vector: Optional[List[float]] = None,
+        k: int = 5,
+        filter_sql: Optional[str] = None,
+        select_columns: Optional[List[str]] = None,
+        include_vector: bool = False
+    ) -> List[Dict[str, Any]]:
+        """
+        Query the collection using semantic search.
+        """
         try:
-            results_list = search_obj.to_df().to_dict(orient='records')
-            if not include_vector and (not select_columns or "vector" not in select_columns):
-                for res in results_list: res.pop('vector', None)
-            if self.update_last_accessed_on_query and results_list:
-                accessed_ids = [r['id'] for r in results_list if 'id' in r]
-                if accessed_ids:
-                    self._update_last_accessed(accessed_ids)
-                    ts = time.time()
-                    for r in results_list:
-                        if r.get('id') in accessed_ids and \
-                           (not actual_select or 'timestamp_last_accessed' in actual_select):
-                             r['timestamp_last_accessed'] = ts
-            return results_list
+            if query_text and self.embedding_function and not query_vector:
+                query_vector = self.embedding_function.generate([query_text])[0]
+
+            if query_vector is not None:
+                # Use LanceDB's search API for vector search
+                search_obj = self.table.search(
+                    query_vector,
+                    vector_column_name="vector"
+                ).limit(k)
+            else:
+                search_obj = self.table.search(
+                    query=query_text,
+                    columns=["content"]
+                ).limit(k)
+
+            if filter_sql:
+                search_obj = search_obj.where(filter_sql)
+
+            results = search_obj.to_list()
+
+            if self.update_last_accessed_on_query and results:
+                current_time = time.time()
+                for result in results:
+                    self.table.update(
+                    f"id = '{result['id']}'",
+                    {"last_accessed_at": current_time}
+                )
+
+            return results
+
         except Exception as e:
-            raise QueryError(f"Col '{self.name}': Query fail. SQL: '{filter_sql or 'N/A'}'. Err: {e}")
+            raise OperationError(f"Query failed: {e}")
 
     def get_by_id(self, entry_id: str, select_columns: Optional[List[str]] = None) -> Optional[Dict[str, Any]]:
         if not self.table: raise InitializationError(f"Col '{self.name}': Table not init.")

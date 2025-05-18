@@ -1,5 +1,5 @@
 import asyncio
-from typing import List, Dict, Any, Optional, Callable, Tuple
+from typing import List, Dict, Any, Optional, Callable, Tuple, Type
 
 from .collection import AgentMemoryCollection # The synchronous class
 from .schemas import MemoryEntrySchema # For type hints

@@ -1,15 +1,15 @@
-# AgentVector
-
-AgentVector is a lightweight, embeddable vector database for agentic AI systems, built on LanceDB.
-
-## Quickstart
-
-```python
+# filepath: examples/quickstart.py
 import asyncio
 import os
 import shutil
 from agentvector import AgentVectorStore, AsyncAgentVectorStore
 from agentvector.embeddings import DefaultTextEmbeddingFunction
+
+# --- AgentVector Banner ---
+print("\033[1;36m")
+print("🧠🚀 Welcome to AgentVector Quickstart! 🚀🧠")
+print("A lightweight, embeddable vector database for agentic AI systems, built on LanceDB.\n")
+print("\033[0m")
 
 DB_DIR = "./_agentvector_mvp_quickstart_db"
 ef = DefaultTextEmbeddingFunction(dimension=64)
@@ -22,6 +22,7 @@ def cleanup_db_dir(db_directory):
 cleanup_db_dir(DB_DIR)
 
 # --- Synchronous API ---
+print("\033[1;34m🔹 [SYNC] Episodic Memory Demo\033[0m")
 store = AgentVectorStore(db_path=DB_DIR)
 episodic_memories = store.get_or_create_collection(
     name="episodic_stream",
@@ -46,11 +47,13 @@ query_results = episodic_memories.query(
     k=1,
     filter_sql="type = 'user_interaction'"
 )
+print("\033[1;32m\n🌟 Sync Query Results:\033[0m")
 for res in query_results:
-    print(f"Sync Query Result: Content='{res.get('content', 'N/A')}', Type='{res.get('type')}'")
+    print(f"\033[1;33m  • {res.get('content', 'N/A')} \033[0m\033[0;35m(Type: {res.get('type')})\033[0m")
 
 # --- Asynchronous API ---
 async def async_example_main():
+    print("\n\033[1;34m🔹 [ASYNC] Agent Thoughts Log Demo\033[0m")
     async_store = AsyncAgentVectorStore(db_path=DB_DIR)
     agent_thoughts = await async_store.get_or_create_collection(
         name="agent_thoughts_log",
@@ -69,13 +72,15 @@ async def async_example_main():
         k=1,
         filter_sql="metadata.extra LIKE '%Nebula%'"
     )
+    print("\033[1;32m\n🌟 Async Query Results:\033[0m")
     for res in async_results:
-        print(f"Async Query Result: Content='{res.get('content', 'N/A')}', Importance='{res.get('importance_score')}'")
+        print(f"\033[1;33m  • {res.get('content', 'N/A')} \033[0m\033[0;35m(Importance: {res.get('importance_score')})\033[0m")
     collections = await async_store.list_collections()
-    print("Collections in the async store:")
+    print("\n\033[1;36m📚 Collections in the async store:\033[0m")
     for coll_name in collections:
         print(f"  - {coll_name}")
 
+    print("\n\033[1;36m🎉 Quickstart complete! Explore more with AgentVector.\033[0m")
+
 if __name__ == "__main__":
     asyncio.run(async_example_main())
-```

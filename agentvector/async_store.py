@@ -1,44 +1,40 @@
 import os
 import lancedb
+import asyncio
 from typing import List, Optional, Type, Any, Dict
 
+from .store import AgentVectorStore
 from .collection import AgentMemoryCollection
 from .schemas import MemoryEntrySchema
 from .exceptions import InitializationError, OperationError
+from .async_collection import AsyncAgentMemoryCollection
 
-class AgentVectorStore:
+class AsyncAgentVectorStore:
     def __init__(self, db_path: str):
         self.db_path = db_path
-        try:
-            os.makedirs(self.db_path, exist_ok=True)
-            self.db = lancedb.connect(self.db_path)
-            # print(f"AgentVectorStore initialized at path: {self.db_path}") # Less verbose for tests
-        except Exception as e:
-            raise InitializationError(f"Failed to connect/init LanceDB at {self.db_path}: {e}")
+        # Use the sync store for all actual DB operations
+        self._sync_store = AgentVectorStore(db_path=db_path)
         self._collections_cache: Dict[str, AgentMemoryCollection] = {}
 
-    def get_or_create_collection(
+    async def get_or_create_collection(
         self, name: str, embedding_function: Optional[Any] = None,
         base_schema: Type[MemoryEntrySchema] = MemoryEntrySchema,
         vector_dimension: Optional[int] = None,
         update_last_accessed_on_query: bool = False,
         recreate: bool = False
-    ) -> AgentMemoryCollection:
-        # If recreate is True, we must not return from cache, and collection init will handle drop.
-        if name in self._collections_cache and not recreate:
-            # TODO: Add logic to check if parameters differ from cached collection's config.
-            # For MVP, if not recreating, return cached. This assumes parameters match.
-            # A mismatch in parameters for an existing cached collection should ideally error or warn.
-            # For now, this simple caching is fine for MVP.
-            return self._collections_cache[name]
-
-        collection_instance = AgentMemoryCollection(
-            db_connection=self.db, name=name, base_schema=base_schema,
-            vector_dimension=vector_dimension, embedding_function=embedding_function,
-            update_last_accessed_on_query=update_last_accessed_on_query, recreate=recreate
+    ) -> "AsyncAgentMemoryCollection":
+        # Always use the sync store's get_or_create_collection, which creates if needed
+        sync_collection = await asyncio.to_thread(
+            self._sync_store.get_or_create_collection,
+            name=name,
+            embedding_function=embedding_function,
+            base_schema=base_schema,
+            vector_dimension=vector_dimension,
+            update_last_accessed_on_query=update_last_accessed_on_query,
+            recreate=recreate
         )
-        self._collections_cache[name] = collection_instance
-        return collection_instance
+        from .async_collection import AsyncAgentMemoryCollection
+        return AsyncAgentMemoryCollection(sync_collection)
 
     def get_collection(self, name: str) -> Optional[AgentMemoryCollection]:
         # MVP: get_collection primarily returns cached collections.
@@ -56,20 +52,36 @@ class AgentVectorStore:
                   f"Use get_or_create_collection with original parameters to access it.")
         return None
 
-    def list_collections(self) -> List[str]:
-        try: return self.db.table_names()
-        except Exception as e: raise OperationError(f"Failed to list collections: {e}")
+    async def list_collections(self) -> list[str]:
+        return await asyncio.to_thread(self._sync_store.list_collections)
 
-    def delete_collection(self, name: str) -> bool:
-        if name in self._collections_cache: del self._collections_cache[name]
-        if name not in self.db.table_names(): return True # Idempotent
+    async def delete_collection(self, name: str) -> bool:
+        return await asyncio.to_thread(self._sync_store.delete_collection, name)
+
+    async def close(self):
+        await asyncio.to_thread(self._sync_store.close)
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        await self.close()
+
+    def create_indexes(self, table):
+        # After you create the table (table = self.db.create_table(...))
+        if table.count_rows() >= 2:
+            try:
+                table.create_index(
+                    vector_column_name="vector",
+                    index_type="IVF_FLAT",
+                    num_partitions=2
+                )
+            except Exception as e:
+                print(f"Warning: Could not create vector index: {e}")
+        else:
+            print("Skipping vector index creation: not enough rows for KMeans.")
+
         try:
-            self.db.drop_table(name)
-            # print(f"Successfully deleted collection: {name}") # Less verbose for tests
-            return True
-        except Exception as e: raise OperationError(f"Failed to delete collection '{name}': {e}")
-
-    def close(self): pass # LanceDB connection usually doesn't need explicit close
-
-    def __enter__(self): return self
-    def __exit__(self, exc_type, exc_val, exc_tb): self.close()
+            table.create_fts_index("content")
+        except Exception as e:
+            print(f"Warning: Could not create text index: {e}")

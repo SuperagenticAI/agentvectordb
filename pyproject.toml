@@ -28,9 +28,13 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "lancedb>=0.6.0",
+    "lancedb",
+    "pylance",
+    "pandas",
     "pydantic>=2.0",
     "numpy",
+    "pyarrow>=12.0.1",  # Added pyarrow dependency
+    "tantivy"
 ]
 
 [project.optional-dependencies]

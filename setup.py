@@ -31,9 +31,13 @@ setup(
     ],
     python_requires=">=3.8",
     install_requires=[
-        "lancedb>=0.6.0",
+        "lancedb",
+        "pylance"
+        "pandas",
         "pydantic>=2.0",
         "numpy",
+        "pyarrow>=12.0.1",
+        "tantivy",  # Add this for full-text search
     ],
     extras_require={
         "dev": [

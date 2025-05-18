@@ -1,21 +1,23 @@
 import time
-import uuid
-from typing import List, Optional, Dict, Any, Type, TypeVar
+from typing import List, Optional, Type, TypeVar
 from pydantic import BaseModel, Field, create_model
 
 T = TypeVar('T', bound='MemoryEntrySchema')
 
-class MemoryEntrySchema(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    content: Optional[str] = None
-    type: Optional[str] = Field(default=None, index=True)
-    timestamp_created: float = Field(default_factory=time.time, index=True)
-    timestamp_last_accessed: Optional[float] = Field(default=None, index=True)
-    source: Optional[str] = Field(default=None, index=True)
-    importance_score: Optional[float] = Field(default=None, index=True, ge=0.0, le=1.0)
-    related_memories: List[str] = Field(default_factory=list)
+class MetadataSchema(BaseModel):
+    source: str = ""
     tags: List[str] = Field(default_factory=list)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    extra: str = "{}"
+
+class MemoryEntrySchema(BaseModel):
+    id: str
+    content: str
+    vector: Optional[List[float]] = None
+    type: str = ""
+    importance_score: float = 0.0
+    metadata: MetadataSchema = Field(default_factory=MetadataSchema)
+    created_at: float = Field(default_factory=time.time)
+    last_accessed_at: float = Field(default_factory=time.time)
 
     class Config:
         extra = 'allow'
