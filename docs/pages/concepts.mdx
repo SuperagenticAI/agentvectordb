@@ -10,6 +10,7 @@ Embeddings are numerical representations of data (text, images, etc.) that captu
 - Store memories efficiently
 - Enable semantic search
 - Find similar content
+- Support clustering for efficient retrieval
 
 ## Key Components
 
@@ -22,6 +23,7 @@ A Store in AgentVectorDB is the main entry point for:
 ```python
 from agentvectordb import AgentVectorDBStore
 
+# Initialize store with a specific path
 store = AgentVectorDBStore(db_path="./my_db")
 ```
 
@@ -30,23 +32,48 @@ Collections organize related memories and provide:
 - Consistent schema enforcement
 - Optimized retrieval
 - Metadata management
+- Vector index management
+
+> **Important**: Collections require at least 8 entries for proper KMeans vector index creation.
 
 ```python
+from agentvectordb.embeddings import DefaultTextEmbeddingFunction
+
+# Create embedding function
+ef = DefaultTextEmbeddingFunction(dimension=64)
+
+# Create collection
 collection = store.get_or_create_collection(
     name="agent_memories",
-    embedding_function=my_embedder
+    embedding_function=ef,
+    recreate=False  # Set to True to start fresh
 )
+
+# Add initial batch of memories (minimum 8 required)
+initial_memories = [
+    {
+        "content": "First observation",
+        "type": "observation",
+        "importance_score": 0.8,
+        "metadata": {"category": "startup"}
+    },
+    # ... add at least 8 memories for proper initialization
+]
+
+# Add batch
+collection.add_batch(initial_memories)
 ```
 
 ### 🧠 Memory Entries
 Each memory entry contains:
 - Content (the actual information)
 - Type (categorization)
-- Importance score
+- Importance score (0.0 to 1.0)
 - Metadata (additional context)
-- Embedding vector
+- Embedding vector (automatically generated)
 
 ```python
+# After initialization with 8+ memories, you can add single entries
 collection.add(
     content="Important observation",
     type="observation",
@@ -76,61 +103,93 @@ class CustomEmbedder(BaseEmbeddingFunction):
 Async support for high-performance applications:
 
 ```python
+import asyncio
 from agentvectordb import AsyncAgentVectorDBStore
 
 async def main():
-    store = AsyncAgentVectorDBStore()
-    collection = await store.get_or_create_collection("async_memories")
-    await collection.add(content="Async thought")
+    # Initialize async store
+    store = AsyncAgentVectorDBStore(db_path="./async_db")
+    
+    # Create collection with embedding function
+    ef = DefaultTextEmbeddingFunction(dimension=64)
+    collection = await store.get_or_create_collection(
+        name="async_memories",
+        embedding_function=ef
+    )
+    
+    # Add memories with error handling
+    try:
+        await collection.add(
+            content="Async thought",
+            type="observation",
+            metadata={"timestamp": "2024-05-19"}
+        )
+    except Exception as e:
+        print(f"Error: {e}")
+
+# Run async code
+asyncio.run(main())
 ```
 
 ### Memory Management
 AgentVectorDB provides several memory management features:
 
-#### Importance Scoring
+#### Vector Index Requirements
+```python
+# Minimum 8 diverse entries required for KMeans index
+collection.add_batch([
+    # Add 8+ diverse memories here
+    # See earlier examples for full structure
+])
+```
+
+#### Memory Types and Importance
 ```python
 collection.add(
-    content="Critical insight",
+    content="Critical system event",
+    type="system_event",
     importance_score=1.0  # Highest importance
 )
 ```
 
-#### Memory Types
-```python
-collection.add(
-    content="Task completed",
-    type="status_update"
-)
-```
-
-#### Metadata
+#### Rich Metadata Support
 ```python
 collection.add(
     content="Meeting notes",
+    type="notes",
+    importance_score=0.8,
     metadata={
-        "date": "2025-05-18",
+        "date": "2024-05-19",
         "participants": ["Alice", "Bob"],
-        "project": "Nebula"
+        "project": "Nebula",
+        "tags": ["meeting", "planning"]
     }
 )
 ```
 
 ## Best Practices
 
-### 1. Collection Organization
-- Group related memories in collections
-- Use consistent naming conventions
-- Keep collections focused and specific
+### 1. Collection Initialization
+- Always start with 8+ diverse memories
+- Use `add_batch()` for initial data loading
+- Ensure proper embedding function configuration
 
 ### 2. Memory Structure
 - Include relevant metadata
 - Set appropriate importance scores
-- Use descriptive memory types
+- Use consistent memory types
+- Provide diverse content for better clustering
 
 ### 3. Query Optimization
 - Use specific queries
-- Filter results effectively
-- Balance precision and recall
+- Implement proper error handling
+- Consider using timeouts for async operations
+- Balance between precision and recall
 
+### 4. Performance Considerations
+- Monitor memory usage with large collections
+- Use batch operations for bulk insertions
+- Consider async operations for better concurrency
+- Properly handle vector index creation
 
 Check the [Guides](guides) section for detailed implementation examples!

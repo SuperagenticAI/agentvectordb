@@ -1,222 +1,416 @@
 # 🧪 Examples
 
+This page provides practical examples of using AgentVectorDB in different scenarios. Each example is designed to demonstrate specific features and common use cases.
+
 ## Basic Usage Examples
 
-### Creating a Simple Memory Store
+### Quick Start
+This example demonstrates the fundamental setup and usage of AgentVectorDB. It shows how to initialize the store, create a collection, and perform basic operations. This pattern is useful for applications that need simple memory storage and retrieval, such as chatbots or personal assistants.
 
-```python filename="memory_example.py"
+Key concepts covered:
+- Store initialization
+- Collection creation
+- Memory batch insertion
+- Basic querying
+
+```python filename="quickstart.py"
 from agentvectordb import AgentVectorDBStore
 from agentvectordb.embeddings import DefaultTextEmbeddingFunction
 
-# Initialize store
-store = AgentVectorDBStore()
+# Initialize store with database path
+store = AgentVectorDBStore(db_path="./agent_db")
 
-# Create a collection for agent thoughts
-thoughts = store.get_or_create_collection(
-    name="agent_thoughts",
-    embedding_function=DefaultTextEmbeddingFunction(dimension=384)
+# Create embedding function
+ef = DefaultTextEmbeddingFunction(dimension=384)
+
+# Create or get collection
+collection = store.get_or_create_collection(
+    name="agent_memories",
+    embedding_function=ef
 )
 
-# Add some memories
-thoughts.add(
-    content="The sky appears blue due to Rayleigh scattering",
-    type="scientific_fact",
-    importance_score=0.8,
-    metadata={
-        "domain": "physics",
-        "confidence": "high",
-        "tags": ["science", "optics"]
+# Initialize with required minimum entries (8+ for KMeans index)
+initial_memories = [
+    {
+        "content": "System started processing batch job",
+        "type": "system_log",
+        "metadata": {"operation": "batch_start"}
+    },
+    {
+        "content": "Memory usage peaked at 85%",
+        "type": "system_metric",
+        "metadata": {"metric": "memory"}
+    },
+    {
+        "content": "Database backup initiated",
+        "type": "maintenance",
+        "metadata": {"operation": "backup"}
+    },
+    {
+        "content": "API response time improved by 20%",
+        "type": "performance",
+        "metadata": {"metric": "latency"}
+    },
+    {
+        "content": "New user registration spike detected",
+        "type": "analytics",
+        "metadata": {"event": "registration"}
+    },
+    {
+        "content": "Cache hit ratio at 95%",
+        "type": "performance",
+        "metadata": {"metric": "cache"}
+    },
+    {
+        "content": "Security scan completed successfully",
+        "type": "security",
+        "metadata": {"event": "scan"}
+    },
+    {
+        "content": "Load balancer configuration updated",
+        "type": "system_config",
+        "metadata": {"component": "lb"}
     }
+]
+
+# Add initial batch
+collection.add_batch(initial_memories)
+
+# Now safe to add individual memories
+collection.add(
+    content="New observation",
+    type="observation",
+    importance_score=0.8,
+    metadata={"category": "general"}
 )
 
-# Query the memories
-results = thoughts.query(
-    query_text="Why is the sky blue?",
-    k=1
+# Query memories
+results = collection.query(
+    query_text="system performance",
+    k=3
 )
 
+# Process results
 for result in results:
-    print(f"Found: {result['content']}")
-    print(f"Importance: {result['importance_score']}")
+    print(f"Content: {result['content']}")
+    print(f"Score: {1 - result['_distance']:.2f}")
+    print(f"Type: {result['type']}\n")
 ```
 
 ### Async Operations
+When building high-performance applications or dealing with multiple concurrent operations, async support becomes crucial. This example shows how to use AgentVectorDB's async capabilities for better scalability and responsiveness. Ideal for web applications, API servers, or any system handling multiple simultaneous requests.
 
-```python
+Key features demonstrated:
+- Async store initialization
+- Concurrent memory operations
+- Error handling with async code
+- Result processing
+
+```python filename="async_example.py"
 import asyncio
 from agentvectordb import AsyncAgentVectorDBStore
+from agentvectordb.embeddings import DefaultTextEmbeddingFunction
 
-async def manage_memories():
-    # Initialize async store
-    store = AsyncAgentVectorDBStore(db_path="./async_memories")
-    
-    # Create async collection
-    memories = await store.get_or_create_collection("agent_memories")
-    
-    # Add memories asynchronously
-    await memories.add(
-        content="Planning next action sequence",
-        type="planning",
-        importance_score=0.9,
-        metadata={"context": "task_execution"}
-    )
-    
-    # Query memories
-    results = await memories.query(
-        query_text="action planning",
-        k=2
-    )
-    
-    return results
-
-# Run the async example
 async def main():
-    results = await manage_memories()
-    print(results)
+    # Initialize async store
+    store = AsyncAgentVectorDBStore(db_path="./async_db")
+    
+    # Create embedding function
+    ef = DefaultTextEmbeddingFunction(dimension=384)
+    
+    # Create collection
+    collection = await store.get_or_create_collection(
+        name="async_memories",
+        embedding_function=ef
+    )
+    
+    # Add initial memories (8+ required for KMeans)
+    initial_memories = [
+        {
+            "content": "System started processing batch job",
+            "type": "system_log",
+            "metadata": {"operation": "batch_start"}
+        },
+        {
+            "content": "Memory usage peaked at 85%",
+            "type": "system_metric",
+            "metadata": {"metric": "memory"}
+        },
+        {
+            "content": "Database backup initiated",
+            "type": "maintenance",
+            "metadata": {"operation": "backup"}
+        },
+        {
+            "content": "API response time improved by 20%",
+            "type": "performance",
+            "metadata": {"metric": "latency"}
+        },
+        {
+            "content": "New user registration spike detected",
+            "type": "analytics",
+            "metadata": {"event": "registration"}
+        },
+        {
+            "content": "Cache hit ratio at 95%",
+            "type": "performance",
+            "metadata": {"metric": "cache"}
+        },
+        {
+            "content": "Security scan completed successfully",
+            "type": "security",
+            "metadata": {"event": "scan"}
+        },
+        {
+            "content": "Load balancer configuration updated",
+            "type": "system_config",
+            "metadata": {"component": "lb"}
+        }
+    ]
+    
+    try:
+        await collection.add_batch(initial_memories)
+        print("Successfully added initial memories")
+        
+        # Query memories
+        results = await collection.query(
+            query_text="performance metrics",
+            k=3
+        )
+        return results
+    except Exception as e:
+        print(f"Error: {e}")
+        return None
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    results = asyncio.run(main())
+    if results:
+        for result in results:
+            print(f"Found: {result['content']}")
 ```
 
-## Advanced Examples
+### Memory Management
+For sophisticated AI agents that need to manage different types of memories with varying retention policies, this example provides a comprehensive memory management system. It demonstrates how to implement short-term and long-term memory stores, which is particularly useful for:
+- Conversational AI systems
+- Learning agents
+- Decision-making systems
+- Knowledge management applications
 
-### Custom Embedding Function
+Key concepts covered:
+- Multiple memory collections
+- Memory initialization strategies
+- Importance-based storage
+- Cross-collection querying
 
-```python
-from agentvectordb.embeddings import BaseEmbeddingFunction
-import numpy as np
-from transformers import AutoTokenizer, AutoModel
+```python filename="memory_manager.py"
+from datetime import datetime, timedelta
+from agentvectordb import AgentVectorDBStore
+from agentvectordb.embeddings import DefaultTextEmbeddingFunction
 
-class TransformerEmbedding(BaseEmbeddingFunction):
-    def __init__(self, model_name="bert-base-uncased"):
-        super().__init__(dimension=768)  # BERT base dimension
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self.model = AutoModel.from_pretrained(model_name)
-    
-    def embed(self, texts):
-        # Tokenize texts
-        inputs = self.tokenizer(
-            texts,
-            padding=True,
-            truncation=True,
-            return_tensors="pt"
-        )
-        
-        # Generate embeddings
-        outputs = self.model(**inputs)
-        embeddings = outputs.last_hidden_state[:, 0, :].detach().numpy()
-        
-        return embeddings
-
-# Use custom embedder
-store = AgentVectorDBStore()
-collection = store.get_or_create_collection(
-    name="semantic_memories",
-    embedding_function=TransformerEmbedding()
-)
-```
-
-### Memory Management System
-
-```python
-class AgentMemoryManager:
-    def __init__(self, db_path="./agent_memory_system"):
+class MemoryManager:
+    def __init__(self, db_path="./managed_memories"):
         self.store = AgentVectorDBStore(db_path=db_path)
+        self.ef = DefaultTextEmbeddingFunction(dimension=384)
+        
+        # Create collections for different memory types
         self.collections = {
-            "thoughts": self.store.get_or_create_collection("thoughts"),
-            "observations": self.store.get_or_create_collection("observations"),
-            "plans": self.store.get_or_create_collection("plans")
+            "short_term": self.store.get_or_create_collection(
+                name="short_term",
+                embedding_function=self.ef
+            ),
+            "long_term": self.store.get_or_create_collection(
+                name="long_term",
+                embedding_function=self.ef
+            )
         }
+        
+        # Initialize with required memories
+        self._initialize_collections()
     
-    def add_thought(self, content, importance=0.5):
-        return self.collections["thoughts"].add(
+    def _initialize_collections(self):
+        """Initialize collections with required minimum entries"""
+        initial_memories = [
+            {
+                "content": "System started processing batch job",
+                "type": "system_log",
+                "metadata": {"operation": "batch_start"}
+            },
+            {
+                "content": "Memory usage peaked at 85%",
+                "type": "system_metric",
+                "metadata": {"metric": "memory"}
+            },
+            {
+                "content": "Database backup initiated",
+                "type": "maintenance",
+                "metadata": {"operation": "backup"}
+            },
+            {
+                "content": "API response time improved by 20%",
+                "type": "performance",
+                "metadata": {"metric": "latency"}
+            },
+            {
+                "content": "New user registration spike detected",
+                "type": "analytics",
+                "metadata": {"event": "registration"}
+            },
+            {
+                "content": "Cache hit ratio at 95%",
+                "type": "performance",
+                "metadata": {"metric": "cache"}
+            },
+            {
+                "content": "Security scan completed successfully",
+                "type": "security",
+                "metadata": {"event": "scan"}
+            },
+            {
+                "content": "Load balancer configuration updated",
+                "type": "system_config",
+                "metadata": {"component": "lb"}
+            }
+        ]
+        
+        for collection in self.collections.values():
+            if collection.count() < 8:
+                collection.add_batch(initial_memories)
+    
+    def add_memory(self, content: str, importance: float, memory_type: str = "short_term"):
+        """Add a new memory"""
+        collection = self.collections[memory_type]
+        return collection.add(
             content=content,
-            type="thought",
+            type=memory_type,
             importance_score=importance,
-            metadata={"timestamp": str(datetime.now())}
+            metadata={
+                "created_at": datetime.now().isoformat()
+            }
         )
     
-    def add_observation(self, content, importance=0.7):
-        return self.collections["observations"].add(
-            content=content,
-            type="observation",
-            importance_score=importance
-        )
-    
-    def query_memories(self, query, collection_name="thoughts", k=5):
-        return self.collections[collection_name].query(
-            query_text=query,
-            k=k
-        )
-
-# Usage example
-memory_manager = AgentMemoryManager()
-memory_manager.add_thought("Need to optimize task sequence")
-memory_manager.add_observation("User seems frustrated")
-results = memory_manager.query_memories("task optimization")
+    def query_memories(self, query: str, memory_type: str = "all", k: int = 5):
+        """Search memories"""
+        if memory_type == "all":
+            all_results = []
+            for collection in self.collections.values():
+                results = collection.query(query_text=query, k=k)
+                all_results.extend(results)
+            return sorted(all_results, key=lambda x: x['_distance'])[:k]
+        
+        return self.collections[memory_type].query(query_text=query, k=k)
 ```
-
-### Working with Metadata and Filtering
-
-```python
-# Add memories with rich metadata
-collection.add(
-    content="Meeting with team about project timeline",
-    type="meeting_note",
-    importance_score=0.8,
-    metadata={
-        "project": "AgentX",
-        "participants": ["Alice", "Bob"],
-        "date": "2025-05-18",
-        "topics": ["planning", "timeline"],
-        "decisions": ["extend_deadline", "add_resources"]
-    }
-)
-
-# Query with SQL filter
-results = collection.query(
-    query_text="project timeline",
-    k=5,
-    filter_sql="metadata.project = 'AgentX' AND importance_score > 0.7"
-)
-```
-
-## Integration Examples
 
 ### FastAPI Integration
+This example showcases how to integrate AgentVectorDB with a modern web framework. It demonstrates building a RESTful API for memory operations, which is particularly useful for:
+- Microservices architectures
+- Web-based AI agents
+- Distributed systems
+- Cloud deployments
 
-```python
-from fastapi import FastAPI
+Key features implemented:
+- REST API endpoints for memory operations
+- Request/response modeling with Pydantic
+- Error handling and status codes
+- Async API handlers
+
+```python filename="api_example.py"
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from typing import Optional, Dict, Any
 from agentvectordb import AgentVectorDBStore
+from agentvectordb.embeddings import DefaultTextEmbeddingFunction
 
 app = FastAPI()
-store = AgentVectorDBStore()
-memories = store.get_or_create_collection("api_memories")
+
+# Initialize store and collection
+store = AgentVectorDBStore(db_path="./api_db")
+ef = DefaultTextEmbeddingFunction(dimension=384)
+memories = store.get_or_create_collection(
+    name="api_memories",
+    embedding_function=ef
+)
 
 class Memory(BaseModel):
     content: str
     importance: float = 0.5
-    metadata: dict = {}
+    memory_type: str = "general"
+    metadata: Optional[Dict[str, Any]] = {}
 
 @app.post("/memories/")
 async def create_memory(memory: Memory):
-    result = memories.add(
-        content=memory.content,
-        importance_score=memory.importance,
-        metadata=memory.metadata
-    )
-    return result
+    try:
+        result = memories.add(
+            content=memory.content,
+            type=memory.memory_type,
+            importance_score=memory.importance,
+            metadata=memory.metadata
+        )
+        return {"status": "success", "memory": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/memories/search/")
 async def search_memories(query: str, limit: int = 5):
-    results = memories.query(
-        query_text=query,
-        k=limit
-    )
-    return results
+    try:
+        results = memories.query(
+            query_text=query,
+            k=limit
+        )
+        return {"status": "success", "results": results}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 ```
 
-> **Tip**: Check the [API Reference](api-reference) for detailed parameter descriptions.
+## Best Practices
+These guidelines ensure optimal performance and reliability when using AgentVectorDB in production environments.
 
-> **Note**: Remember to handle exceptions appropriately in production code.
+### 1. Initialization Best Practices
+Proper initialization is crucial for optimal performance. The KMeans algorithm used for indexing requires at least 8 diverse entries to function effectively. This requirement ensures:
+- Better vector space organization
+- More accurate similarity searches
+- Improved query performance
+
+### 2. Error Handling
+Robust error handling is essential for production systems. When implementing error handling:
+- Catch specific exceptions for better error management
+- Provide meaningful error messages
+- Implement proper fallback strategies
+- Log errors for debugging
+
+### 3. Performance Optimization
+To achieve optimal performance:
+- Use batch operations for multiple entries
+- Implement efficient pruning strategies
+- Leverage async operations for concurrent processing
+- Monitor and optimize memory usage
+
+### 4. Memory Management Strategies
+Effective memory management is crucial for long-running systems:
+- Implement regular cleanup routines
+- Use importance scores to prioritize memories
+- Balance between retention and performance
+- Consider implementing backup strategies
+
+## Common Use Cases
+
+1. **Conversational AI**
+   - Store conversation history
+   - Maintain context
+   - Track user preferences
+
+2. **Knowledge Management**
+   - Store and retrieve documents
+   - Maintain organizational knowledge
+   - Track information updates
+
+3. **Learning Systems**
+   - Store training examples
+   - Track learning progress
+   - Maintain model performance metrics
+
+4. **Monitoring Systems**
+   - Store system metrics
+   - Track performance indicators
+   - Maintain audit logs
+
+For detailed API documentation and advanced usage patterns, refer to the [API Reference](api-reference) section.

@@ -1,249 +1,225 @@
 # 🧠 AgentVectorDB
 
 [![PyPI version](https://badge.fury.io/py/agentvectordb.svg)](https://badge.fury.io/py/agentvectordb)
-[![Python versions](https://img.shields.io/pypi/pyversions/agentvectordb.svg)](https://pypi.org/project/agentvectordb/)
+[![Python](https://img.shields.io/pypi/pyversions/agentvectordb.svg?logo=python&logoColor=white&color=blue)](https://pypi.org/project/agentvectordb)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Tests](https://github.com/superagenticai/agentvectordb/workflows/Tests/badge.svg)](https://github.com/superagenticai/agentvectordb/actions)
-[![Documentation](https://readthedocs.org/projects/agentvectordb/badge/?version=latest)](https://agentvectordb.readthedocs.io/)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Documentation Status](https://readthedocs.org/projects/agentvectordb/badge/?version=latest)](https://agentvectordb.readthedocs.io/en/latest/?badge=latest)
+[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![Coverage](https://codecov.io/gh/superagenticai/agentvectordb/branch/main/graph/badge.svg)](https://codecov.io/gh/superagenticai/agentvectordb)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-**AgentVectorDB: The Cognitive Core for Your AI Agents**
 
-AgentVectorDB is a lightweight, embeddable vector database designed for agentic AI systems. It empowers your agents with persistent memory, semantic search, and tools for internal reasoning and learning. Built on the performance and simplicity of [LanceDB](https://github.com/lancedb/lancedb), AgentVectorDB is the default memory layer for sophisticated AI agents, offering a familiar "collection-based" API.
+> The Cognitive Core for Your AI Agents - Powered by LanceDB
 
----
+## 📚 Documentation Quick Links
+- [Getting Started](https://agentvectordb.readthedocs.io/getting-started)
+- [API Reference](https://agentvectordb.readthedocs.io/api-reference)
+- [Examples](https://agentvectordb.readthedocs.io/examples)
+- [FAQ](https://agentvectordb.readthedocs.io/faq)
 
-## 🚀 Why AgentVectorDB?
+## 🌟 Overview
+AgentVectorDB is a specialized memory management system developed by [Superagentic AI](https://super-agentic.ai). Built on top of LanceDB's powerful vector database capabilities, it provides optimized cognitive architecture for AI agents.
 
-- **Familiar API:** Uses a `Store -> Collection` model, similar to other popular vector databases.
-- **Lightweight & Embeddable:** Runs directly within your agent's process using LanceDB. No separate server, minimal dependencies.
-- **Agent-Centric Schema:** Default schema includes fields like `type` (observation, thought, goal), `source`, `importance_score`, and `last_accessed_at` to provide a cognitive framework for each memory entry.
-- **Temporal Dynamics:** Built-in support for recency, memory decay (`prune_memories`), and tracking when memories were last accessed.
-- **Rich Querying:** Powerful semantic search combined with SQL filtering (`filter_sql`) for maximum flexibility.
-- **Seamless Embedding Integration:** Works with [LanceDB's embedding functions](https://lancedb.github.io/lancedb/embeddings/) or your custom embedding models, configurable per collection.
-- **Asynchronous API:** Provides `AsyncAgentVectorDBStore` and `AsyncAgentMemoryCollection` for integration with async-first agent frameworks.
-- **Open Source & Extensible:** Built with best practices, ready for community contributions.
+## 🤝 Built with LanceDB
+We extend LanceDB's robust foundation with agent-specific features:
+- Agent memory patterns
+- Importance scoring
+- Context management
+- Cognitive state handling
 
----
+## ✨ Key Features
 
-## ✨ Features at a Glance
+### Core Capabilities
+- **📝 Persistent Storage**: File-based, no server required
+- **🔍 Semantic Search**: Efficient ANN search with filtering
+- **⚡ Async Support**: High-performance async/await API
+- **🎯 Agent-Optimized**: Purpose-built for AI systems
 
-- **Persistent Storage:** File-based, no server required.
-- **Vector Search:** Efficient ANN search.
-- **Metadata Filtering:** Use `filter_sql` for powerful filtering.
-- **CRUD Operations:** Add, retrieve, update, and delete memories.
-- **Batch Operations:** Efficiently add multiple memories.
-- **Memory Pruning:** `prune_memories` method for memory decay strategies.
-- **Dynamic Schema:** Flexible Pydantic-based schemas per collection.
-- **Timestamp Tracking:** Automatic `created_at` and optional `last_accessed_at` updates.
-- **Async Support:** Fully asynchronous API available.
-
----
+### Advanced Features
+- **🔄 Memory Lifecycle**: Complete CRUD operations
+- **📊 Batch Processing**: Efficient bulk operations
+- **🧹 Smart Pruning**: Intelligent memory management
+- **🔧 Flexible Schema**: Dynamic Pydantic schemas
+- **⏱️ Time Tracking**: Automatic timestamps
 
 ## 📦 Installation
 
 ```bash
+# Basic installation
 pip install agentvectordb
-```
 
-Or for the latest development version:
-```bash
-pip install git+https://github.com/superagenticai/agentvectordb.git
-```
+# With all extras (recommended)
+pip install "agentvectordb[all]"
 
-To install locally for development:
-```bash
+# Development installation
 git clone https://github.com/superagenticai/agentvectordb.git
 cd agentvectordb
-pip install -e .[dev]
+pip install -e ".[dev]"
 ```
 
----
-
-## 🏁 Quickstart
+## 🚀 Quick Start
 
 ```python
-import asyncio
-import os
-import shutil
-from agentvectordb import AgentVectorDBStore, AsyncAgentVectorDBStore
+from agentvectordb import AgentVectorDBStore
 from agentvectordb.embeddings import DefaultTextEmbeddingFunction
 
-print("\033[1;36m")
-print("🧠🚀 Welcome to AgentVectorDB Quickstart! 🚀🧠")
-print("A lightweight, embeddable vector database for agentic AI systems, built on LanceDB.\n")
-print("\033[0m")
+# Initialize store
+store = AgentVectorDBStore(db_path="./agent_db")
+ef = DefaultTextEmbeddingFunction(dimension=384)
 
-DB_DIR = "./_agentvectordb_mvp_quickstart_db"
-ef = DefaultTextEmbeddingFunction(dimension=64)
-
-def cleanup_db_dir(db_directory):
-    if os.path.exists(db_directory):
-        shutil.rmtree(db_directory)
-    os.makedirs(db_directory, exist_ok=True)
-
-cleanup_db_dir(DB_DIR)
-
-# --- Synchronous API ---
-print("\033[1;34m🔹 [SYNC] Episodic Memory Demo\033[0m")
-store = AgentVectorDBStore(db_path=DB_DIR)
-episodic_memories = store.get_or_create_collection(
-    name="episodic_stream",
-    embedding_function=ef,
-    update_last_accessed_on_query=True,
-    recreate=True
+# Create collection
+memories = store.get_or_create_collection(
+    name="agent_memories",
+    embedding_function=ef
 )
-episodic_memories.add(
-    content="User inquired about AgentVectorDB's collection feature.",
-    type="user_interaction",
-    source="chat_interface",
-    tags=["agentvectordb_feature", "collections_api"]
-)
-episodic_memories.add(
-    content="Agent decided to use the 'episodic_stream' collection for observations.",
-    type="internal_decision",
-    source="agent_reasoner",
-    importance_score=0.7
-)
-query_results = episodic_memories.query(
-    query_text="AgentVectorDB collection feature",
-    k=1,
-    filter_sql="type = 'user_interaction'"
-)
-print("\033[1;32m\n🌟 Sync Query Results:\033[0m")
-for res in query_results:
-    print(f"\033[1;33m  • {res.get('content', 'N/A')} \033[0m\033[0;35m(Type: {res.get('type')})\033[0m")
 
-# --- Asynchronous API ---
-async def async_example_main():
-    print("\n\033[1;34m🔹 [ASYNC] Agent Thoughts Log Demo\033[0m")
-    async_store = AsyncAgentVectorDBStore(db_path=DB_DIR)
-    agent_thoughts = await async_store.get_or_create_collection(
-        name="agent_thoughts_log",
-        embedding_function=ef,
-        update_last_accessed_on_query=True,
-        recreate=True
-    )
-    await agent_thoughts.add(
-        content="Async thought: Need to plan next steps for Project Nebula.",
-        type="planning_thought",
-        importance_score=0.85,
-        metadata={"project": "Nebula", "status": "pending_review"}
-    )
-    async_results = await agent_thoughts.query(
-        query_text="Project Nebula planning",
-        k=1,
-        filter_sql="metadata.extra LIKE '%Nebula%'"
-    )
-    print("\033[1;32m\n🌟 Async Query Results:\033[0m")
-    for res in async_results:
-        print(f"\033[1;33m  • {res.get('content', 'N/A')} \033[0m\033[0;35m(Importance: {res.get('importance_score')})\033[0m")
-    collections = await async_store.list_collections()
-    print("\n\033[1;36m📚 Collections in the async store:\033[0m")
-    for coll_name in collections:
-        print(f"  - {coll_name}")
+# Add memories (minimum 8 recommended)
+initial_memories = [
+    {
+        "content": "User prefers dark mode",
+        "type": "preference",
+        "importance_score": 0.8
+    },
+    # Add more memories...
+]
 
-    print("\n\033[1;36m🎉 Quickstart complete! Explore more with AgentVectorDB.\033[0m")
+# Add batch
+memories.add_batch(initial_memories)
 
-if __name__ == "__main__":
-    asyncio.run(async_example_main())
+# Query memories
+results = memories.query(
+    query_text="user preferences",
+    k=2
+)
 ```
-
----
 
 ## 🛠️ API Overview
 
-### `AgentVectorDBStore(db_path: str)`
+### Store Classes
 
-- **db_path:** Directory where LanceDB database files are stored.
+#### AgentVectorDBStore
+```python
+store = AgentVectorDBStore(db_path="./db")
+```
 
-**Methods:**
+Methods:
+- `get_or_create_collection()`
+- `list_collections()`
+- `delete_collection()`
 
-- `get_or_create_collection(...)` – Create or open a collection.
-- `list_collections()` – List all collections.
-- `delete_collection(name: str)` – Delete a collection.
+#### AsyncAgentVectorDBStore
+```python
+store = AsyncAgentVectorDBStore(db_path="./db")
+```
 
-### `AgentMemoryCollection`
+### Collection Classes
 
-- **Properties:** `name`, `embedding_function`, `schema`
-- **Methods:** `add`, `add_batch`, `query`, `get_by_id`, `delete`, `count`, `prune_memories`, `__len__`
-
-### Asynchronous API
-
-- `AsyncAgentVectorDBStore`
-- `AsyncAgentMemoryCollection`
-    - All methods of their synchronous counterparts are available as `async` methods.
-
----
+#### AgentMemoryCollection
+Methods:
+- `add()`: Add single memory
+- `add_batch()`: Add multiple memories
+- `query()`: Search memories
+- `prune_memories()`: Remove old memories
+- `delete()`: Remove memories
+- `count()`: Get collection size
 
 ## 📚 Advanced Usage
 
-### Multiple Collections
+### Custom Embedding Functions
 
 ```python
-store = AgentVectorDBStore(db_path="./my_multi_agent_db")
-kb_ef = DefaultTextEmbeddingFunction(dimension=128)
-knowledge_base = store.get_or_create_collection(
-    name="knowledge_base",
-    embedding_function=kb_ef
-)
-knowledge_base.add(content="The Earth revolves around the Sun.", type="astronomy_fact")
+from agentvectordb.embeddings import BaseEmbeddingFunction
+
+class CustomEmbedder(BaseEmbeddingFunction):
+    def __init__(self, dimension=384):
+        super().__init__(dimension=dimension)
+    
+    def embed(self, texts):
+        # Your embedding logic here
+        return vectors
 ```
 
-### Filtering with `filter_sql`
+### Memory Management
 
 ```python
-results = my_collection.query(
-    query_text="relevant topic",
-    k=5,
-    filter_sql="type = 'log_entry' AND importance_score > 0.5 AND metadata.extra LIKE '%user123%'"
+# Prune old memories
+pruned = collection.prune_memories(
+    max_age_seconds=7*24*3600,  # 7 days
+    min_importance_score=0.3
+)
+
+# Complex queries
+results = collection.query(
+    query_text="important task",
+    filter_sql="type = 'task' AND importance_score > 0.8",
+    k=5
 )
 ```
 
-### Memory Pruning
+### Async Operations
 
 ```python
-pruned_count = observations.prune_memories(
-    max_age_seconds=86400 * 7,
-    min_importance_score=0.3,
-    filter_logic="AND",
-    dry_run=False
-)
-print(f"Pruned {pruned_count} old/unimportant observations.")
+async def handle_memories():
+    store = AsyncAgentVectorDBStore(db_path="./async_db")
+    collection = await store.get_or_create_collection(
+        name="async_memories",
+        embedding_function=ef
+    )
+    
+    await collection.add_batch(memories)
+    results = await collection.query(
+        query_text="search term",
+        k=5
+    )
 ```
 
----
+## 🎯 Use Cases
 
-## 🧑‍💻 More Examples
+- Personal AI assistants
+- Customer service bots
+- Research agents
+- Task automation agents
+- Knowledge management systems
+- Learning systems
 
-See the [`examples/`](./examples/) directory for:
+## 🔄 Memory Types
 
-- `quickstart.py` – Full sync & async demo
-- `sync_basic_usage.py` – Minimal synchronous usage
-- `async_batch_add.py` – Async batch add/query
-- `metadata_filtering.py` – Metadata and SQL filtering
-- `prune_and_count.py` – Pruning and counting
-- `async_delete.py` – Async deletion
+- Episodic memories
+- Semantic knowledge
+- Procedural information
+- Short-term observations
+- Long-term knowledge
 
----
+## 🛣️ Roadmap
 
-## 🛤️ Roadmap & Contributing
-
-AgentVectorDB is actively evolving. Planned features include:
-- More sophisticated filter builders
+Upcoming features:
+- Enhanced filter builders
 - Reflection/summarization helpers
-- Schema evolution helpers
-- Community-driven extensions
+- Schema evolution support
+- Memory consolidation
+- Extended embedding support
+- Performance optimizations
 
-**Contributions are welcome!** Please see `CONTRIBUTING.md` for guidelines.
+## 🤝 Contributing
 
----
+We welcome contributions! See our [Contributing Guide](CONTRIBUTING.md).
 
 ## 📄 License
 
-This project is licensed under the Apache-2.0 License.
+Licensed under Apache 2.0 - same as LanceDB. See [LICENSE](LICENSE).
+
+## 🙋‍♂️ Support
+
+- GitHub Issues: Technical support
+- Email: support@super-agentic.ai
+- Enterprise: enterprise@super-agentic.ai
+
+## 🙏 Acknowledgments
+
+Built with ❤️ by [Superagentic AI](https://super-agentic.ai) using [LanceDB](https://github.com/lancedb/lancedb)
 
 ---
 
-**AgentVectorDB: Give your AI agents a memory!**
+<p align="center">
+  <b>AgentVectorDB: Empower Your AI Agents with Memory!</b>
+</p>

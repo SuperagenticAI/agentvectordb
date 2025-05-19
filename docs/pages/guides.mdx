@@ -1,6 +1,6 @@
-# 📖 Guides
+# 📖 Complete Guide to AgentVectorDB
 
-## Installation & Setup
+## 🛠️ Installation & Setup
 
 ### System Requirements
 
@@ -8,242 +8,377 @@ Before installing AgentVectorDB, ensure your system meets these requirements:
 
 - Python 3.8 or higher
 - pip (Python package installer)
-- 100MB free disk space
+- 100MB free disk space (minimum)
 - 512MB RAM (minimum)
+- For production: 1GB+ RAM recommended
 
-> [!note]
-> For production use, we recommend at least 1GB RAM.
+### Installation Options
 
-### Installation Methods
-
-#### 1. Direct Installation
 ```bash
+# Basic installation
 pip install agentvectordb
-```
 
-#### 2. Development Installation
-```bash
+# Development installation
 git clone https://github.com/superagenticai/agentvectordb.git
 cd agentvectordb
 pip install -e .
+
+# With all extras (recommended for development)
+pip install "agentvectordb[all]"
 ```
 
-#### 3. With Extra Dependencies
-```bash
-pip install "agentvectordb[dev]"  # Includes development tools
-```
-
-## Basic Usage Guide
+## 🚀 Basic Usage Guide
 
 ### 1. Initialize Store
 
 ```python
 from agentvectordb import AgentVectorDBStore
+from agentvectordb.embeddings import DefaultTextEmbeddingFunction
 
-# Create a new store
-store = AgentVectorDBStore(
-    db_path="./my_agent_db",
-    create_if_missing=True
-)
+# Create embedding function
+ef = DefaultTextEmbeddingFunction(dimension=64)
+
+# Initialize store with path
+store = AgentVectorDBStore(db_path="./my_agent_db")
 ```
 
-### 2. Create Collections
+### 2. Create Collection
 
 ```python
-# Create different collections for different types of memories
-thoughts = store.get_or_create_collection("thoughts")
-observations = store.get_or_create_collection("observations")
-plans = store.get_or_create_collection("plans")
+# Create or get a collection with embedding function
+collection = store.get_or_create_collection(
+    name="agent_memories",
+    embedding_function=ef,
+    recreate=False  # Set to True only if you want to delete existing collection
+)
 ```
 
-### 3. Add Memories
+### 3. Add Initial Memories
+
+> **Important**: Collections require at least 8 entries for proper KMeans vector index creation. Adding fewer entries will result in the warning "Skipping vector index creation: not enough rows for KMeans" and reduced search performance.
 
 ```python
-# Add a thought
-thoughts.add(
-    content="Consider optimizing the search algorithm",
-    type="technical_thought",
-    importance_score=0.8,
-    metadata={
-        "project": "optimization",
-        "priority": "high",
-        "tags": ["performance", "algorithms"]
+# Initialize with required minimum entries (8 diverse memories required for KMeans)
+initial_memories = [
+    {
+        "content": "System started processing batch job",
+        "type": "system_log",
+        "metadata": {"operation": "batch_start"}
+    },
+    {
+        "content": "Memory usage peaked at 85%",
+        "type": "system_metric",
+        "metadata": {"metric": "memory"}
+    },
+    {
+        "content": "Database backup initiated",
+        "type": "maintenance",
+        "metadata": {"operation": "backup"}
+    },
+    {
+        "content": "API response time improved by 20%",
+        "type": "performance",
+        "metadata": {"metric": "latency"}
+    },
+    {
+        "content": "New user registration spike detected",
+        "type": "analytics",
+        "metadata": {"event": "registration"}
+    },
+    {
+        "content": "Cache hit ratio at 95%",
+        "type": "performance",
+        "metadata": {"metric": "cache"}
+    },
+    {
+        "content": "Security scan completed successfully",
+        "type": "security",
+        "metadata": {"event": "scan"}
+    },
+    {
+        "content": "Load balancer configuration updated",
+        "type": "system_config",
+        "metadata": {"component": "lb"}
     }
-)
+]
 
-# Add an observation
-observations.add(
-    content="User interaction patterns show preference for voice commands",
-    type="user_observation",
-    importance_score=0.9,
-    metadata={
-        "source": "user_study",
-        "confidence": "high"
-    }
-)
+# Add initial batch (this will create the KMeans index)
+collection.add_batch(initial_memories)
+
+# Verify the index creation
+print(f"Collection size: {collection.count()}")  # Should show 8 or more entries
 ```
 
-## Advanced Usage Guide
+### 4. Query Memories
 
-### Custom Embedding Functions
+```python
+# Simple semantic search
+results = collection.query(
+    query_text="system performance",
+    k=2  # Number of results to return
+)
 
-#### 1. Basic Custom Embedder
+# Process results
+for result in results:
+    print(f"Content: {result['content']}")
+    print(f"Score: {result['_distance']}")
+    print("---")
+```
+
+## 🔄 Async Usage
+
+```python
+import asyncio
+from agentvectordb import AsyncAgentVectorDBStore
+from agentvectordb.embeddings import DefaultTextEmbeddingFunction
+
+async def main():
+    # Create embedding function
+    ef = DefaultTextEmbeddingFunction(dimension=64)
+    
+    # Initialize async store
+    store = AsyncAgentVectorDBStore(db_path="./async_db")
+    
+    # Create collection
+    collection = await store.get_or_create_collection(
+        name="async_memories",
+        embedding_function=ef
+    )
+    
+    # Add initial batch with required minimum entries
+    initial_memories = [
+        {
+            "content": "Processing async operation 1",
+            "type": "system_log",
+            "metadata": {"timestamp": "2024-05-19T10:00:00"}
+        },
+        {
+            "content": "Async task queue status",
+            "type": "system_metric",
+            "metadata": {"queue_size": 10}
+        },
+        {
+            "content": "Background job completed",
+            "type": "task_status",
+            "metadata": {"duration": "5m"}
+        },
+        {
+            "content": "WebSocket connection established",
+            "type": "connection",
+            "metadata": {"client_id": "client1"}
+        },
+        {
+            "content": "Cache invalidation triggered",
+            "type": "cache",
+            "metadata": {"reason": "update"}
+        },
+        {
+            "content": "Rate limiter status check",
+            "type": "security",
+            "metadata": {"limits": "ok"}
+        },
+        {
+            "content": "Async worker health check",
+            "type": "health",
+            "metadata": {"status": "healthy"}
+        },
+        {
+            "content": "Event stream processing status",
+            "type": "stream",
+            "metadata": {"events": 100}
+        }
+    ]
+    
+    try:
+        await collection.add_batch(initial_memories)
+        print("Successfully initialized with required minimum entries")
+        
+        # Now you can add single entries
+        await collection.add(
+            content="New async operation",
+            type="system_log",
+            metadata={"timestamp": "2024-05-19T11:00:00"}
+        )
+    except Exception as e:
+        print(f"Error: {e}")
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+## 🧠 Embedding Functions Guide
+
+### Built-in Embeddings
+
+```python
+from agentvectordb.embeddings import DefaultTextEmbeddingFunction
+
+# Default embedding
+ef = DefaultTextEmbeddingFunction(dimension=384)
+```
+
+### OpenAI Integration
+
+```python
+from agentvectordb.embeddings import BaseEmbeddingFunction
+import openai
+
+class OpenAIEmbedding(BaseEmbeddingFunction):
+    def __init__(self, api_key, model="text-embedding-3-small"):
+        openai.api_key = api_key
+        self.model = model
+        self._dimension = 1536
+        
+    def embed(self, texts):
+        response = openai.Embedding.create(
+            input=texts,
+            model=self.model
+        )
+        return [item.embedding for item in response.data]
+```
+
+### Custom Embeddings
+
 ```python
 from agentvectordb.embeddings import BaseEmbeddingFunction
 import numpy as np
 
-class SimpleHashEmbedder(BaseEmbeddingFunction):
-    def __init__(self):
-        super().__init__(dimension=64)
+class CustomEmbedding(BaseEmbeddingFunction):
+    def __init__(self, dimension=64):
+        super().__init__(dimension=dimension)
     
     def embed(self, texts):
-        embeddings = []
-        for text in texts:
-            # Simple hash-based embedding
-            hash_values = [hash(char) for char in text]
-            embedding = np.array(hash_values[:64]) % 1000 / 1000.0
-            embeddings.append(embedding)
-        return np.array(embeddings)
+        # Your embedding logic here
+        return np.random.rand(len(texts), self.dimension)
 ```
 
-#### 2. Integration with Hugging Face
+## 🎯 Advanced Features
+
+### Complex Queries
+
 ```python
-from transformers import AutoTokenizer, AutoModel
-import torch
-
-class HuggingFaceEmbedder(BaseEmbeddingFunction):
-    def __init__(self, model_name="sentence-transformers/all-MiniLM-L6-v2"):
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self.model = AutoModel.from_pretrained(model_name)
-        super().__init__(dimension=384)  # Model's output dimension
-    
-    def embed(self, texts):
-        # Tokenize and get embeddings
-        inputs = self.tokenizer(texts, padding=True, truncation=True, return_tensors="pt")
-        with torch.no_grad():
-            outputs = self.model(**inputs)
-        return outputs.last_hidden_state[:, 0, :].numpy()
-```
-
-### Memory Management Strategies
-
-#### 1. Importance-Based Retention
-```python
-def cleanup_memories(collection, threshold=0.5):
-    """Remove less important memories."""
-    collection.delete(
-        filter_sql=f"importance_score < {threshold}"
-    )
-```
-
-#### 2. Time-Based Management
-```python
-from datetime import datetime, timedelta
-
-def archive_old_memories(collection, days_threshold=30):
-    """Archive memories older than threshold."""
-    cutoff_date = datetime.now() - timedelta(days=days_threshold)
-    old_memories = collection.query(
-        query_text="",
-        filter_sql=f"metadata.timestamp < '{cutoff_date}'"
-    )
-    # Process old memories...
-```
-
-### Advanced Querying
-
-#### 1. Complex Filters
-```python
-# Query with multiple conditions
+# Query with filters
 results = collection.query(
-    query_text="optimization algorithm",
+    query_text="performance issues",
     k=5,
-    filter_sql="""
-        importance_score > 0.7 AND
-        metadata.project = 'optimization' AND
-        metadata.priority = 'high'
-    """
+    filter_sql="type = 'performance' AND importance_score > 0.7",
+    include_vectors=True
 )
 ```
 
-#### 2. Semantic Search with Metadata
+### Batch Operations
+
 ```python
-def semantic_search_with_context(collection, query, context_filter):
-    """Search with semantic similarity and contextual filtering."""
-    return collection.query(
-        query_text=query,
-        k=10,
-        filter_sql=f"metadata.context = '{context_filter}'"
+def process_large_dataset(collection, data, batch_size=100):
+    """Process large datasets efficiently."""
+    for i in range(0, len(data), batch_size):
+        batch = data[i:i + batch_size]
+        try:
+            collection.add_batch(batch)
+        except Exception as e:
+            print(f"Error processing batch: {e}")
+```
+
+### Memory Management
+
+```python
+def cleanup_old_memories(collection, days_threshold=30):
+    """Remove old memories."""
+    import datetime
+    
+    cutoff_date = datetime.datetime.now() - datetime.timedelta(days=days_threshold)
+    collection.delete(
+        filter_sql=f"created_at < '{cutoff_date.isoformat()}'"
     )
 ```
 
-## Performance Optimization
+## 🔧 Best Practices
 
-### 1. Batch Operations
+### Error Handling
+
 ```python
-def batch_add_memories(collection, memories):
-    """Add multiple memories efficiently."""
-    for batch in chunk_list(memories, size=100):
-        collection.add_batch(batch)
+from agentvectordb.exceptions import AgentVectorDBException
 
-def chunk_list(lst, size):
-    """Helper to create batches."""
-    for i in range(0, len(lst), size):
-        yield lst[i:i + size]
+def safe_operation(func):
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except AgentVectorDBException as e:
+            print(f"Operation failed: {e}")
+            return None
+    return wrapper
+
+@safe_operation
+def add_memory(collection, content, **kwargs):
+    return collection.add(content=content, **kwargs)
 ```
 
-### 2. Index Optimization
-```python
-# Configure collection with optimized settings
-collection = store.get_or_create_collection(
-    name="optimized_memories",
-    embedding_function=custom_embedder,
-    index_params={
-        "M": 16,  # Number of connections per element
-        "ef_construction": 200  # Index time/quality trade-off
-    }
-)
-```
+### Logging Setup
 
-> [!tip]
-> Use batch operations when adding multiple items for better performance.
-
-> [!warning]
-> Always handle exceptions in production code:
-> ```python
-> try:
->     collection.add(content="Important thought")
-> except AgentVectorException as e:
->     logger.error(f"Failed to add memory: {e}")
-> ```
-
-## Best Practices
-
-### 1. Error Handling
-```python
-from agentvectordb.exceptions import AgentVectorException
-
-def safe_add_memory(collection, content, **kwargs):
-    try:
-        return collection.add(content=content, **kwargs)
-    except AgentVectorException as e:
-        logger.error(f"Failed to add memory: {e}")
-        return None
-```
-
-### 2. Logging Configuration
 ```python
 import logging
 
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('agent_memory.log'),
+        logging.StreamHandler()
+    ]
 )
+
+logger = logging.getLogger('agentvectordb')
 ```
 
+## 🔍 Troubleshooting
 
-Always use virtual environments for isolation:
-> ```bash
-> python -m venv venv
-> source venv/bin/activate  # On Windows: venv\Scripts\activate
-> ```
+### Common Issues
+
+1. KMeans Index Creation
+```python
+# Always add at least 8 diverse memories initially
+collection.add_batch([...])  # Minimum 8 items
+```
+
+2. Memory Management
+```python
+# Monitor collection size
+print(f"Collection size: {collection.count()}")
+```
+
+3. Query Performance
+```python
+# Use appropriate batch sizes
+BATCH_SIZE = 100  # Adjust based on your needs
+```
+
+## 🚀 Production Deployment
+
+### Configuration
+
+```python
+PRODUCTION_CONFIG = {
+    "db_path": "/path/to/prod/db",
+    "backup_path": "/path/to/backups",
+    "log_level": "INFO",
+    "batch_size": 100,
+    "cleanup_days": 30
+}
+```
+
+### Monitoring
+
+```python
+def monitor_collection_stats(collection):
+    """Monitor collection statistics."""
+    stats = {
+        "size": collection.count(),
+        "types": collection.query("SELECT DISTINCT type FROM collection"),
+        "latest": collection.query("SELECT MAX(created_at) FROM collection")
+    }
+    return stats
+```
+
+## 🤝 Contributing
+
+We welcome contributions! See our [Contributing Guide](./contributing.mdx) for details.

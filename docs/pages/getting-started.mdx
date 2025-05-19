@@ -1,113 +1,319 @@
-# 🚀 Getting Started
+# 🚀 Getting Started with AgentVectorDB
 
-## Prerequisites
+AgentVectorDB is a specialized vector database designed for AI agents, built on LanceDB. This guide will help you set up and start using AgentVectorDB in your projects.
+
+## 🎯 Key Features
+
+- 📝 Semantic search optimized for AI agent memories
+- 🔄 Async/sync APIs for flexible integration
+- 🔍 Advanced filtering and querying capabilities
+- 📊 Customizable schema support
+- 🚄 High-performance vector operations
+- 💾 Persistent storage with LanceDB backend
+
+## ✅ Prerequisites
 
 Before installing AgentVectorDB, ensure you have:
+- 🐍 Python 3.8 or higher installed
+- 📦 pip (Python package installer)
+- 🔧 Virtual environment tool (venv or conda)
+- 💻 Terminal or command prompt access
 
-- Python 3.8 or higher installed
-- pip (Python package installer)
-- Basic understanding of vector databases and embeddings
+## 📥 Installation Guide
 
-> [!tip]
-> Not sure about your Python version? Run `python --version` in your terminal.
+### 1. Setting Up Python Environment
 
-## Installation
+#### 🔨 Using venv (Python's built-in virtual environment)
 
-### 1. Install Python (if needed)
-
-#### On macOS
+For Mac/Linux:
 ```bash
-brew install python@3.11
-```
-
-#### On Ubuntu/Debian
-
-```bash
-sudo apt update
-sudo apt install python3.11 python3-pip
-```
-
-#### On Windows
-
-Download Python from python.org or use:
-
-```bash
-winget install Python.Python.3.11
-```
-
-
-##  Create a Virtual Environment
-
-
-```bash
-
 # Create a new directory for your project
-mkdir my-agent-project
-cd my-agent-project
+mkdir my_agent_project
+cd my_agent_project
+
+# Create a virtual environment
+python3 -m venv venv
+
+# Activate the virtual environment
+source venv/bin/activate
+
+# Verify Python version
+python --version
+```
+
+For Windows:
+```bash
+# Create a new directory for your project
+mkdir my_agent_project
+cd my_agent_project
 
 # Create a virtual environment
 python -m venv venv
 
 # Activate the virtual environment
-# On Windows:
-venv\Scripts\activate
-# On macOS/Linux:
-source venv/bin/activate
+.\venv\Scripts\activate
 
+# Verify Python version
+python --version
 ```
-## Install AgentVectorDB
 
-```bash 
+#### 🐍 Using Conda
+
+```bash
+# Create a new conda environment
+conda create -n agentdb python=3.10
+
+# Activate the conda environment
+conda activate agentdb
+
+# Verify conda environment
+conda info --envs
+```
+
+### 2. 📦 Installing AgentVectorDB
+
+```bash
+# Basic installation
 pip install agentvectordb
+
+# Installation with all optional dependencies (recommended for full features)
+pip install agentvectordb[all]
+
+# Development installation (if you want to contribute)
+git clone https://github.com/superagenticai/agentvectordb.git
+cd agentvectordb
+pip install -e ".[dev]"
 ```
 
-##  Quick Example
-Here's a minimal example to get you started:
+### 3. ✅ Verify Installation
 
-```python filename="quickstart.py"
+```bash
+# Check installed version
+python -c "import agentvectordb; print(agentvectordb.__version__)"
+
+# Verify dependencies
+pip freeze | grep agentvectordb
+```
+
+## 🎓 Basic Usage
+
+### 1. 🏗️ Create a Store
+
+```python
 from agentvectordb import AgentVectorDBStore
+from agentvectordb.embeddings import DefaultTextEmbeddingFunction
 
-# Initialize store
-store = AgentVectorDBStore(db_path="./my_db")
+# Initialize the store with path
+store = AgentVectorDBStore(db_path="./my_agent_db")
+
+# Create embedding function with specific dimensions
+ef = DefaultTextEmbeddingFunction(dimension=64)
 ```
-##  Async Support
-AgentVectorDB also provides async APIs for use with async frameworks:
+
+### 2. 📚 Create a Collection
+
+```python
+# Create or get a collection with specific embedding function
+collection = store.get_or_create_collection(
+    name="agent_memories",
+    embedding_function=ef,
+    recreate=False  # Set to True only if you want to delete existing collection
+)
+```
+
+### 3. 💾 Add Memories
+
+> **Important**: The vector store requires at least 2 examples for proper index creation using KMeans. Adding fewer items will result in "Skipping vector index creation: not enough rows for KMeans" warning.
+
+```python
+# Add multiple memories in batch to ensure vector index creation
+memories = [
+    {
+        "content": "The sky appears blue due to Rayleigh scattering of sunlight",
+        "type": "scientific_fact",
+        "importance_score": 0.8,
+        "metadata": {
+            "domain": "physics",
+            "confidence": "high",
+            "tags": ["science", "physics", "optics"]
+        }
+    },
+    {
+        "content": "API response times reduced by 40% after optimization",
+        "type": "performance",
+        "importance_score": 0.89,
+        "metadata": {
+            "component": "api",
+            "improvement": "significant"
+        }
+    }
+]
+
+# Add memories in batch
+collection.add_batch(memories)
+
+# After batch initialization, you can add single memories
+collection.add(
+    content="New observation about system",
+    type="observation",
+    importance_score=0.75,  # Note the correct syntax here
+    metadata={"category": "system"}
+)
+
+# Verify the collection size
+print(f"Collection size: {collection.count()}")
+```
+
+#### Best Practices for Adding Memories
+
+1. Always start with a batch of at least 8 diverse memories (10+ recommended)
+2. Use `add_batch()` for initial data loading
+3. Ensure memories cover different types and contexts
+4. After initial batch, you can use single `add()` operations
+5. Include varied metadata and types for better vector clustering
+
+### 4. 🔍 Query Memories
+
+```python
+# Simple semantic search
+results = collection.query(
+    query_text="Why is the sky blue?",
+    k=2  # Number of results to return
+)
+
+# Process results
+for result in results:
+    print(f"Content: {result['content']}")
+    print(f"Similarity Score: {result['_distance']}")
+    print(f"Metadata: {result.get('metadata', {})}")
+
+# Query with filters
+filtered_results = collection.query(
+    query_text="user preferences",
+    k=5,
+    filter_sql="type = 'user_preference' AND importance_score > 0.5"
+)
+```
+
+## Async Usage
+
+AgentVectorDB provides async APIs for better integration with async applications:
 
 ```python
 import asyncio
 from agentvectordb import AsyncAgentVectorDBStore
+from agentvectordb.embeddings import DefaultTextEmbeddingFunction
 
 async def main():
-    store = AsyncAgentVectorDBStore(db_path="./my_async_db")
-    collection = await store.get_or_create_collection("async_memories")
-    
-    # Add memory asynchronously
-    await collection.add(
-        content="Processing data asynchronously",
-        type="system_log"
-    )
+    # Create embedding function
+    ef = DefaultTextEmbeddingFunction(dimension=64)
 
-    # Query asynchronously
-    results = await collection.query(
-        query_text="async processing",
-        k=1
+    # Initialize async store
+    store = AsyncAgentVectorDBStore(db_path="./async_db")
+    
+    # Create collection
+    collection = await store.get_or_create_collection(
+        name="async_memories",
+        embedding_function=ef,
+        recreate=True  # Start fresh
     )
     
-    print(results)
+    # Create initial memories
+    initial_memories = [
+        {
+            "content": "System started processing batch job",
+            "type": "system_log",
+            "metadata": {"operation": "batch_start"}
+        },
+        {
+            "content": "Processing async operation",
+            "type": "system_log",
+            "metadata": {"timestamp": "2024-05-19"}
+        }
+    ]
 
+    # Add initial batch
+    try:
+        await collection.add_batch(initial_memories)
+        print("Successfully added initial memories")
+        # Note: This will show a warning about KMeans index creation
+        # as it requires minimum 8 entries
+    except Exception as e:
+        print(f"Error adding batch memories: {e}")
+        return None
+    
+    # Query memories with timeout
+    try:
+        results = await asyncio.wait_for(
+            collection.query(
+                query_text="async processing",
+                k=1
+            ),
+            timeout=5.0
+        )
+        return results
+    except asyncio.TimeoutError:
+        print("Query timed out")
+        return None
+
+# Run async code
 if __name__ == "__main__":
-    asyncio.run(main())
+    result = asyncio.run(main())
+    if result:
+        print("\nQuery Results:")
+        for item in result:
+            print(f"Content: {item['content']}")
+            print(f"Score: {item['_distance']}")
+            print("---")
 ```
 
-## Next Steps
+> **Note**: While this example shows basic async usage with two memories, you'll see a warning: "Skipping vector index creation: not enough rows for KMeans." For production use, it's recommended to start with at least 5 diverse memories as shown in the earlier batch example.
 
-Explore Core Concepts to understand AgentVectorDB's architecture
-Check out the Guides for detailed usage instructions
-See Examples for more code samples
-Read the API Reference for detailed documentation
+## 🔧 Advanced Configuration
 
-Remember to always activate your virtual environment before running Python scripts:
+### Custom Schema Definition
 
-```bash
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+```python
+from pydantic import BaseModel, Field
+from typing import Optional, List
+
+class CustomMemorySchema(BaseModel):
+    content: str
+    importance: float = Field(ge=0.0, le=1.0)
+    tags: Optional[List[str]] = []
+    source_id: Optional[str] = None
 ```
+
+### Performance Optimization
+
+```python
+# Batch operations for better performance
+with collection.batch_add() as batch:
+    for memory in large_memory_list:
+        batch.add(memory)
+```
+
+## 🚨 Common Pitfalls
+
+1. **Memory Management**: Watch memory usage with large collections
+2. **Vector Dimensions**: Choose appropriate dimensions for your use case
+3. **Batch Operations**: Use batch operations for large datasets
+4. **Index Updates**: Consider index update frequency
+
+## 🔜 Next Steps
+
+1. 📚 Explore the [Core Concepts](./core-concepts.mdx) section
+2. 📖 Check the [API Reference](./api-reference.mdx)
+3. 💡 View [Examples](./examples.mdx) for more usage patterns
+4. 📋 Read the [Guides](./guides.mdx) for best practices
+
+## 🆘 Support & Resources
+
+- 🐛 [Report Issues](https://github.com/superagenticai/agentvectordb/issues)
+- 📚 [Documentation](https://agentvectordb.readthedocs.io/)
+- 💬 [Community Discussions](https://github.com/superagenticai/agentvectordb/discussions)
+- 📧 [Contact Support](mailto:support@example.com)
+
+## 🤝 Contributing
+
+We welcome contributions! See our [Contributing Guide](./contributing.mdx) for details.

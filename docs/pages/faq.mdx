@@ -1,9 +1,9 @@
 # ❓ Frequently Asked Questions
 
-## General Questions
+## About AgentVectorDB
 
 ### What is AgentVectorDB?
-AgentVectorDB is a specialized vector database designed for AI agents. It provides:
+AgentVectorDB is a specialized vector database designed for AI agents, developed by [Superagentic AI](https://super-agentic.ai). It provides:
 - Efficient memory storage and retrieval
 - Semantic search capabilities
 - Async/sync API support
@@ -12,188 +12,194 @@ AgentVectorDB is a specialized vector database designed for AI agents. It provid
 
 ### Why use AgentVectorDB?
 - **Purpose-built for agents**: Optimized for agent memory management
-- **Lightweight**: Minimal dependencies and resource usage
+- **Production-ready**: Built on LanceDB's reliable foundation
 - **Flexible**: Works with any embedding model
-- **Fast**: Built on LanceDB for high-performance vector operations
+- **Fast**: High-performance vector operations
 - **Easy to use**: Simple, intuitive API
 
-## Technical Questions
+### Relationship with LanceDB
+AgentVectorDB is built on top of LanceDB and shares the same Apache 2.0 license. It's not a competitor but rather a specialized layer adding agent-specific features while leveraging LanceDB's robust vector database capabilities.
 
-### What Python versions are supported?
-AgentVectorDB supports:
-- Python 3.8
-- Python 3.9
-- Python 3.10
-- Python 3.11
-- Python 3.12
+## Technical Implementation
 
+### Python Version Support
 ```python
-# Check your Python version
+# Supported Python versions:
+
+# - Python 3.12
+
+# Check your version
 import sys
 print(sys.version)
 ```
 
-### How do I use custom embedding models?
-
-You can implement your own embedding function:
-
+### Custom Embedding Models
 ```python
 from agentvectordb.embeddings import BaseEmbeddingFunction
+import numpy as np
 
 class CustomEmbedder(BaseEmbeddingFunction):
-    def __init__(self):
-        super().__init__(dimension=384)
+    def __init__(self, dimension: int = 384):
+        super().__init__(dimension=dimension)
     
-    def embed(self, texts):
+    def embed(self, texts: List[str]) -> np.ndarray:
         # Your embedding logic here
-        return vectors
+        return np.random.rand(len(texts), self.dimension)
 
-# Use custom embedder
-store = AgentVectorDBStore()
+# Usage
+embedder = CustomEmbedder(dimension=384)
 collection = store.get_or_create_collection(
     name="memories",
-    embedding_function=CustomEmbedder()
+    embedding_function=embedder
 )
 ```
 
-### What's the maximum vector dimension supported?
+### Vector Dimensions
+Recommended dimensions based on use case:
+- Basic embeddings: 64-384 dimensions
+- Language models: 384-768 dimensions
+- Advanced models: 768-1536 dimensions
+- Specialized cases: Up to 4096 dimensions
 
-There's no hard limit, but we recommend:
-- 64-512 dimensions for simple use cases
-- 768-1024 dimensions for transformer models
-- Up to 4096 dimensions for specialized cases
-
-> [!note]
-> Higher dimensions increase memory usage and processing time.
-
-### How do I handle concurrent access?
-
-Use the async API for concurrent operations:
-
+### Concurrent Access
 ```python
 from agentvectordb import AsyncAgentVectorDBStore
+import asyncio
 
-async def safe_access():
-    store = AsyncAgentVectorDBStore()
+async def safe_concurrent_ops():
+    store = AsyncAgentVectorDBStore(db_path="./agent_db")
     collection = await store.get_or_create_collection("shared_memories")
-    await collection.add(content="Concurrent access test")
+    
+    # Concurrent operations
+    tasks = [
+        collection.add(content=f"Memory {i}", type="test")
+        for i in range(10)
+    ]
+    await asyncio.gather(*tasks)
 ```
 
-## Performance Questions
+## Performance Optimization
 
-### What's the recommended batch size for additions?
-
-We recommend:
-- 100-1000 items per batch for normal usage
-- 50-100 items for real-time applications
-- Up to 5000 items for bulk imports
-
+### Batch Operations
 ```python
-def optimal_batch_add(collection, items, batch_size=1000):
+# Recommended batch sizes
+BATCH_SIZES = {
+    "realtime": 50,     # For real-time applications
+    "standard": 500,    # For normal operations
+    "bulk": 2000        # For data migration
+}
+
+def batch_processor(collection, items, batch_size=BATCH_SIZES["standard"]):
+    """Process items in optimal batch sizes."""
     for i in range(0, len(items), batch_size):
         batch = items[i:i + batch_size]
-        collection.add_batch(batch)
+        try:
+            collection.add_batch(batch)
+        except Exception as e:
+            print(f"Batch {i}-{i+batch_size} failed: {e}")
 ```
 
-### How can I optimize query performance?
-
-1. Use efficient filters:
+### Query Optimization
 ```python
-# Good
+# Efficient querying
 results = collection.query(
-    query_text="important",
-    filter_sql="importance_score > 0.8"
+    query_text="important memory",
+    k=5,
+    filter_sql="type = 'critical' AND importance_score > 0.8",
+    include_vectors=False  # Set to True only if needed
 )
-
-# Better (using indexed fields)
-results = collection.query(
-    query_text="important",
-    filter_sql="type = 'critical' AND metadata.priority = 'high'"
-)
-```
-
-2. Choose appropriate vector dimensions:
-```python
-# Balance between accuracy and performance
-embedder = DefaultTextEmbeddingFunction(dimension=384)
 ```
 
 ## Error Handling
 
-### How do I debug common errors?
-
-1. Connection Issues:
+### Common Exceptions
 ```python
-try:
-    store = AgentVectorDBStore(db_path="./my_db")
-except InitializationError as e:
-    print(f"Database initialization failed: {e}")
+from agentvectordb.exceptions import (
+    AgentVectorDBException,  # Base exception
+    InitializationError,     # Database setup issues
+    SchemaError,            # Schema validation failures
+    QueryError,             # Search/query issues
+    OperationError         # General operations
+)
+
+def safe_operation(func):
+    """Decorator for safe memory operations."""
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except SchemaError as e:
+            print(f"Schema validation failed: {e}")
+        except QueryError as e:
+            print(f"Query failed: {e}")
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+        return None
+    return wrapper
 ```
 
-2. Query Errors:
-```python
-try:
-    results = collection.query(query_text="test")
-except QueryError as e:
-    print(f"Query failed: {e}")
-```
+## Contributing Guide
 
-### How do I handle migration errors?
-
-Use our migration utility:
-```python
-from agentvectordb.utils import migrate_database
-
-try:
-    migrate_database("old_db_path", "new_db_path")
-except OperationError as e:
-    print(f"Migration failed: {e}")
-```
-
-## Community and Support
-
-### Where can I get help?
-
-1. **GitHub Issues**: 
-   - Report bugs
-   - Request features
-   - Ask technical questions
-   - [Open an issue](https://github.com/superagenticai/agentvectordb/issues)
-
-2. **Community Channels**:
-   - Discord server
-   - GitHub Discussions
-   - Stack Overflow tag: `agentvectordb`
-
-### How can I contribute?
-
-1. Fork the repository
-2. Create a feature branch
-3. Submit a pull request
-
+### Setup Development Environment
 ```bash
-# Contributing workflow
-git clone https://github.com/yourusername/agentvectordb.git
+# Clone repository
+git clone https://github.com/superagenticai/agentvectordb.git
 cd agentvectordb
-git checkout -b feature/your-feature
-# Make changes
-git commit -am "Add new feature"
-git push origin feature/your-feature
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -e ".[dev]"
+
+# Install pre-commit hooks
+pre-commit install
 ```
 
-> [!tip]
-> Check our [Contributing Guidelines](https://github.com/superagenticai/agentvectordb/blob/main/CONTRIBUTING.md) for more details.
+### Run Tests
+```bash
+# Run all tests
+pytest
 
-### How do I cite AgentVectorDB?
+# Run with coverage
+pytest --cov=agentvectordb
+```
 
+### Submit Changes
+1. Fork the repository
+2. Create feature branch
+3. Follow code style (black, ruff)
+4. Add tests for new features
+5. Update documentation
+6. Submit pull request
+
+## Support & Resources
+
+### Get Help
+- GitHub Issues: Technical issues & features
+- Discord Community: Real-time support
+- Documentation: [agentvectordb.readthedocs.io](https://agentvectordb.readthedocs.io)
+- Email: support@super-agentic.ai
+
+### Citation
 ```bibtex
 @software{agentvectordb2024,
   title = {AgentVectorDB: The Cognitive Core for AI Agents},
-  author = {Jagtap, Shashi},
+  author = {Jagtap, Shashi and {Superagentic AI}},
   year = {2024},
   url = {https://github.com/superagenticai/agentvectordb}
 }
 ```
 
+### License
+AgentVectorDB is licensed under the Apache 2.0 License, the same as LanceDB. This ensures:
+- Commercial use allowed
+- Modification allowed
+- Distribution allowed
+- Private use allowed
+- Patent use included
+- Trademark use excluded
 
-Still have questions? Contact support@super-agentic.ai
+For enterprise support, custom features, or consulting:
+- Email: enterprise@super-agentic.ai
+- Website: [super-agentic.ai](https://super-agentic.ai)
