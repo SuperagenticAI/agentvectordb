@@ -13,6 +13,5 @@ export default withNextra({
   },
   assetPrefix: '/agentvectordb/',
   basePath: '/agentvectordb',
-  output: 'export',
   reactStrictMode: true,
 })
