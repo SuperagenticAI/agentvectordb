@@ -8,7 +8,8 @@ from typing import Any, Dict
 
 def _format_sql_value(value: Any) -> str:
     if isinstance(value, str):
-        return f"'{str(value).replace("'", "''")}'"
+        # Fix the quote escaping using single quotes consistently
+        return f"'{str(value).replace('\'', '\'\'')}'"
     elif isinstance(value, bool):
         return str(value).lower()
     elif value is None:
