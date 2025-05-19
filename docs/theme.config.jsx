@@ -7,10 +7,13 @@ const config = {
     link: 'https://github.com/superagenticai/agentvectordb'
   },
   docsRepositoryBase: 'https://github.com/superagenticai/agentvectordb/tree/main/docs/pages',
-  primaryHue: { dark: 200 },
-  nextThemes: {
-    defaultTheme: 'dark',
-    forcedTheme: 'dark'
+  theme: {
+    default: 'dark',
+    forced: 'dark'
+  },
+  docs: {
+    editLink: false,
+    themeSwitch: false
   },
 
   head: () => (
@@ -20,51 +23,15 @@ const config = {
       <meta property="og:description" content="A lightweight, embeddable vector database for Agentic AI systems" />
       <style>
         {`
-          /* Force black background on all elements */
-          :root, html, body, #__next, main, .dark, 
-          .dark .nx-bg-white,
-          .dark .nx-bg-neutral-50,
-          .dark .nx-bg-neutral-100,
-          .dark .nx-bg-gray-100,
-          .dark .dark\:nx-bg-neutral-900,
-          .dark .dark\:nx-bg-dark,
-          .dark nav.nextra-nav-container,
-          .dark footer.nx-bg-neutral-100,
-          .dark header.nx-bg-white,
-          .dark .nextra-sidebar-container,
-          .dark .nextra-nav-container-blur,
-          .dark .nextra-nav-container-blur::before,
-          .dark .nextra-nav-container-blur::after,
-          .dark .nx-sticky.nx-top-0,
-          .dark .nx-sticky-nav,
-          .dark aside.nextra-sidebar,
-          .dark .nextra-scrollbar,
-          .dark .nx-absolute.nx-top-0 {
+          /* Dark theme styling */
+          :root, html, body, #__next, main {
             background-color: #000000 !important;
-            border-color: #000000 !important;
+            color: #ffffff !important;
           }
-
-          /* Remove any blur effects */
-          .dark .nextra-nav-container-blur::before,
-          .dark .nextra-nav-container-blur::after {
-            backdrop-filter: none !important;
-            -webkit-backdrop-filter: none !important;
-          }
-
-          /* Remove borders and shadows */
-          .dark *,
-          .dark .nx-shadow-lg,
-          .dark .nx-border,
-          .dark .nx-border-b,
-          .dark .nx-border-t,
-          .dark [class*='nx-border'] {
-            border-color: #000000 !important;
-            box-shadow: none !important;
-          }
-
-          /* Code block styling */
+          
+          /* Code blocks */
           .dark .nextra-code-block pre {
-            background-color: #0a0a0a !important;
+            background-color:rgb(2, 0, 0) !important;
             margin: 1rem 0;
             padding: 1.5rem;
             border-radius: 0.375rem;
@@ -73,11 +40,6 @@ const config = {
           .dark .line.highlighted {
             background-color: #1a1a1a !important;
             border-left: 2px solid #0070f3 !important;
-          }
-
-          /* Force black on hover states */
-          .dark *:hover {
-            background-color: #000000 !important;
           }
         `}
       </style>
@@ -88,7 +50,7 @@ const config = {
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
         <span>AgentVectorDB by Superagentic AI © {new Date().getFullYear()}</span>
         <a href="https://github.com/superagenticai/agentvectordb" target="_blank" rel="noopener">
-          <span style={{ fontSize: '20px' }}>⭐️</span>
+          <span style={{ fontSize: '10px' }}>⭐️</span>
         </a>
       </div>
     )
