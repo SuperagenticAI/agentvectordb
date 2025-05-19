@@ -1,32 +1,132 @@
 # 🧠 AgentVectorDB
 
-> The Cognitive Core for Your AI Agents - Built on LanceDB
+[![PyPI version](https://badge.fury.io/py/agentvectordb.svg)](https://badge.fury.io/py/agentvectordb)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
+> The Cognitive Core for Your AI Agents - Powered by LanceDB
 
+## 🌟 Overview
 
-## 🎯 Why AgentVectorDB?
+AgentVectorDB is a specialized memory management system developed by [Superagentic AI](https://super-agentic.ai). Built on top of LanceDB's powerful vector database capabilities, it provides optimized cognitive architecture for AI agents.
 
-## 🎯 Key Features
+## 🤝 Built with LanceDB
 
-- 📝 Semantic search optimized for AI agent memories
-- 🔄 Async/sync APIs for flexible integration
-- 🔍 Advanced filtering and querying capabilities
-- 📊 Customizable schema support
-- 🚄 High-performance vector operations
-- 💾 Persistent storage with LanceDB backend
+We extend LanceDB's robust foundation with agent-specific features:
 
-## ✅ Prerequisites
+- Agent memory patterns
+- Importance scoring
+- Context management
+- Cognitive state handling
 
-Before installing AgentVectorDB, ensure you have:
-- 🐍 Python 3.8 or higher installed
-- 📦 pip (Python package installer)
-- 🔧 Virtual environment tool (venv or conda)
-- 💻 Terminal or command prompt access
+## ✨ Key Features
 
-## 🎁 Key Features
+### Core Capabilities
 
+- **📝 Persistent Storage**: File-based, no server required
+- **🔍 Semantic Search**: Efficient ANN search with filtering
+- **⚡ Async Support**: High-performance async/await API
+- **🎯 Agent-Optimized**: Purpose-built for AI systems
 
-AgentVectorDB combines powerful cognitive architecture capabilities with technical excellence to provide a comprehensive solution for AI agent memory management.
+### Advanced Features
+
+- **🔄 Memory Lifecycle**: Complete CRUD operations
+- **📊 Batch Processing**: Efficient bulk operations
+- **🧹 Smart Pruning**: Intelligent memory management
+- **🔧 Flexible Schema**: Dynamic Pydantic schemas
+- **⏱️ Time Tracking**: Automatic timestamps
+
+## 📦 Installation
+
+```bash
+# Basic installation
+pip install agentvectordb
+
+# With all extras (recommended)
+pip install "agentvectordb[all]"
+
+# Development installation
+git clone https://github.com/superagenticai/agentvectordb.git
+cd agentvectordb
+pip install -e ".[dev]"
+```
+
+## 🚀 Quick Start
+
+```python
+from agentvectordb import AgentVectorDBStore
+from agentvectordb.embeddings import DefaultTextEmbeddingFunction
+
+# Initialize store
+store = AgentVectorDBStore(db_path="./agent_db")
+ef = DefaultTextEmbeddingFunction(dimension=384)
+
+# Create collection
+memories = store.get_or_create_collection(
+    name="agent_memories",
+    embedding_function=ef
+)
+
+# Add memories (minimum 8 recommended)
+initial_memories = [
+    {
+        "content": "User prefers dark mode",
+        "type": "preference",
+        "importance_score": 0.8
+    },
+    # Add more memories...
+]
+
+# Add batch
+memories.add_batch(initial_memories)
+
+# Query memories
+results = memories.query(
+    query_text="user preferences",
+    k=2
+)
+```
+
+## 🛠️ API Overview
+
+### Store Classes
+
+#### AgentVectorDBStore
+
+# Built for AI Agents
+
+- Personal AI assistants
+- Customer service bots
+- Research agents
+- Process automation
+
+In enterprise settings, AgentVectorDB excels by managing vast amounts of contextual data, thus enhancing knowledge workers' productivity and decision-making quality.
+
+### 🔬 Research & Development
+
+- AI research projects
+- Cognitive architecture development
+- Agent behavior studies
+- Performance benchmarking
+
+Researchers benefit from AgentVectorDB's ability to handle experimental data and agent simulations, providing insights into AI behavior and system performance.
+
+Our documentation is comprehensive and designed to help you every step of the way, from initial setup to advanced usage scenarios.
+
+## 📄 License & Attribution
+
+AgentVectorDB shares the same Apache 2.0 License as LanceDB, maintaining full compatibility and open-source principles. We're proud to build upon and extend LanceDB's capabilities for agent-specific use cases.
+
+<div className="license-box p-6 bg-gray-50 rounded-lg shadow-sm my-8">
+  <h3 className="text-lg font-bold">Relationship with LanceDB</h3>
+  <ul>
+    <li>Built on top of LanceDB</li>
+    <li>Shares Apache 2.0 License</li>
+    <li>Specialized for AI agents</li>
+    <li>Not a competitor</li>
+    <li>Complementary solution</li>
+  </ul>
+</div>
 
 ### 🧠 Cognitive Architecture
 Our cognitive architecture is designed to mirror human memory systems, providing both short-term and long-term memory capabilities with intelligent retrieval mechanisms.
