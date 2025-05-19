@@ -1,11 +1,17 @@
 import os
 import shutil
 import time
-from typing import List
+from typing import List, Optional  # Add Optional here
 
 import pytest
+from pydantic import Field  # Add Field import
 
-from agentvectordb import AgentMemoryCollection, AgentVectorDBStore, AsyncAgentMemoryCollection, AsyncAgentVectorDBStore
+from agentvectordb import (
+    AgentMemoryCollection,
+    AgentVectorDBStore,
+    AsyncAgentMemoryCollection,
+    AsyncAgentVectorDBStore,
+)
 from agentvectordb.embeddings import DefaultTextEmbeddingFunction
 from agentvectordb.schemas import MemoryEntrySchema
 

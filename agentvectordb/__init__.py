@@ -1,4 +1,6 @@
 from . import embeddings, utils
+from .agent_memory import AgentMemory  # Add this import
+from .async_agent_memory import AsyncAgentMemory  # Add this import
 from .async_collection import AsyncAgentMemoryCollection
 from .async_store import AsyncAgentVectorDBStore
 from .collection import AgentMemoryCollection
@@ -21,6 +23,8 @@ __all__ = [
     "AgentMemoryCollection",
     "AsyncAgentVectorDBStore",
     "AsyncAgentMemoryCollection",
+    "AgentMemory",  # Add this
+    "AsyncAgentMemory",  # Add this
     # Schemas & Helpers
     "MemoryEntrySchema",
     "create_dynamic_memory_entry_schema",
