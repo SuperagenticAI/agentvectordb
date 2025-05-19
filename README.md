@@ -1,5 +1,13 @@
 # 🧠 AgentVectorDB
 
+[![PyPI version](https://badge.fury.io/py/agentvectordb.svg)](https://badge.fury.io/py/agentvectordb)
+[![Python versions](https://img.shields.io/pypi/pyversions/agentvectordb.svg)](https://pypi.org/project/agentvectordb/)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![Tests](https://github.com/superagenticai/agentvectordb/workflows/Tests/badge.svg)](https://github.com/superagenticai/agentvectordb/actions)
+[![Documentation](https://readthedocs.org/projects/agentvectordb/badge/?version=latest)](https://agentvectordb.readthedocs.io/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Coverage](https://codecov.io/gh/superagenticai/agentvectordb/branch/main/graph/badge.svg)](https://codecov.io/gh/superagenticai/agentvectordb)
+
 **AgentVectorDB: The Cognitive Core for Your AI Agents**
 
 AgentVectorDB is a lightweight, embeddable vector database designed for agentic AI systems. It empowers your agents with persistent memory, semantic search, and tools for internal reasoning and learning. Built on the performance and simplicity of [LanceDB](https://github.com/lancedb/lancedb), AgentVectorDB is the default memory layer for sophisticated AI agents, offering a familiar "collection-based" API.

@@ -20,7 +20,7 @@ This project and everyone participating in it are governed by our [Code of Condu
 1. Fork the repository
 2. Clone your fork:
 ```bash
-git clone https://github.com/your-username/agentvectordb.git
+git clone https://github.com/superagenticai/agentvectordb.git
 cd agentvectordb
 ```
 
@@ -131,8 +131,7 @@ def add_memory(self, content: str, importance: float) -> str:
 ## Getting Help
 
 - Open an issue for bugs or feature requests
-- Join our [Discord/Slack] community
-- Check our [FAQ](docs/faq.md)
+- Check our [FAQ](docs/faq.md) (Soon)
 
 ## License
 
