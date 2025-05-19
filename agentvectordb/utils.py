@@ -8,9 +8,7 @@ from typing import Any, Dict
 
 def _format_sql_value(value: Any) -> str:
     if isinstance(value, str):
-        # Using string concatenation to avoid f-string backslash issues
-        escaped_value = str(value).replace("'", "''")
-        return f"'{escaped_value}'"
+        return f"'{str(value).replace("'", "''")}'"
     elif isinstance(value, bool):
         return str(value).lower()
     elif value is None:
