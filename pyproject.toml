@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agentvectordb"
-version = "0.0.1"
+version = "0.0.2"
 authors = [
     { name = "Shashi Jagtap", email = "shashi@super-agentic.ai" },
 ]
-description = "AgentVectorDB: The Cognitive Core for Your AI Agents. A lightweight, embeddable vector database for Agentic AI systems, built on LanceDB."
+description = "AgentVectorDB (AVDB): The Cognitive Core for Your AI Agents. A lightweight, embeddable vector database for Agentic AI systems, built on LanceDB."
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.8"

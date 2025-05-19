@@ -1,4 +1,4 @@
-# 🧠 AgentVectorDB
+# 🧠 AgentVectorDB (AVDB)
 
 [![PyPI version](https://badge.fury.io/py/agentvectordb.svg)](https://badge.fury.io/py/agentvectordb)
 [![Python](https://img.shields.io/pypi/pyversions/agentvectordb.svg?logo=python&logoColor=white&color=blue)](https://pypi.org/project/agentvectordb)
@@ -18,7 +18,7 @@
 - [FAQ](https://agentvectordb.readthedocs.io/faq)
 
 ## 🌟 Overview
-AgentVectorDB is a specialized memory management system developed by [Superagentic AI](https://super-agentic.ai). Built on top of LanceDB's powerful vector database capabilities, it provides optimized cognitive architecture for AI agents.
+AgentVectorDB (AVDB) is a specialized memory management system developed by [Superagentic AI](https://super-agentic.ai). Built on top of LanceDB's powerful vector database capabilities, it provides optimized cognitive architecture for AI agents.
 
 ## 🤝 Built with LanceDB
 We extend LanceDB's robust foundation with agent-specific features:
