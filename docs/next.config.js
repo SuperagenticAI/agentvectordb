@@ -11,8 +11,7 @@ export default withNextra({
   images: {
     unoptimized: true,
   },
-  assetPrefix: process.env.NODE_ENV === 'production' ? '/' : '',
-  basePath: '',
+  assetPrefix: '/agentvectordb/',
+  basePath: '/agentvectordb',
   reactStrictMode: true,
-  staticFileDirectories: ['static'],
 })
