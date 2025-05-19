@@ -11,7 +11,8 @@ export default withNextra({
   images: {
     unoptimized: true,
   },
-  assetPrefix: process.env.NODE_ENV === 'production' ? 'https://superagenticai.github.io/' : '',
+  assetPrefix: process.env.NODE_ENV === 'production' ? '/' : '',
   basePath: '',
   reactStrictMode: true,
+  staticFileDirectories: ['static'],
 })
