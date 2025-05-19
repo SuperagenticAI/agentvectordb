@@ -10,7 +10,7 @@ authors = [
 ]
 description = "AgentVectorDB: The Cognitive Core for Your AI Agents. A lightweight, embeddable vector database for Agentic AI systems, built on LanceDB."
 readme = "README.md"
-license = "Apache-2.0"
+license = { file = "LICENSE" }
 requires-python = ">=3.8"
 classifiers = [
     "Development Status :: 3 - Alpha",
