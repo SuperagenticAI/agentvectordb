@@ -10,7 +10,10 @@
 
 > The Cognitive Core for Your AI Agents - Powered by LanceDB
 
-## 📚 Documentation Quick Links
+## 📚 Superagentic AI Introduction
+  [Superagentic AI Website](https://super-agentic.ai/agent-vectordb)
+
+## 📚 Project Documentation
 - [Getting Started](https://superagenticai.github.io/agentvectordb/getting-started)
 - [API Reference](https://superagenticai.github.io/agentvectordb/api-reference)
 - [Examples](https://superagenticai.github.io/agentvectordb/examples)
