@@ -3,19 +3,18 @@
 [![PyPI version](https://badge.fury.io/py/agentvectordb.svg)](https://badge.fury.io/py/agentvectordb)
 [![Python](https://img.shields.io/pypi/pyversions/agentvectordb.svg?logo=python&logoColor=white&color=blue)](https://pypi.org/project/agentvectordb)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Documentation Status](https://readthedocs.org/projects/agentvectordb/badge/?version=latest)](https://agentvectordb.readthedocs.io/en/latest/?badge=latest)
+[![Documentation](https://img.shields.io/badge/Documentation-orange)](https://superagenticai.github.io/agentvectordb)
 [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
-[![Coverage](https://codecov.io/gh/superagenticai/agentvectordb/branch/main/graph/badge.svg)](https://codecov.io/gh/superagenticai/agentvectordb)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 
 > The Cognitive Core for Your AI Agents - Powered by LanceDB
 
 ## 📚 Documentation Quick Links
-- [Getting Started](https://agentvectordb.readthedocs.io/getting-started)
-- [API Reference](https://agentvectordb.readthedocs.io/api-reference)
-- [Examples](https://agentvectordb.readthedocs.io/examples)
-- [FAQ](https://agentvectordb.readthedocs.io/faq)
+- [Getting Started](https://superagenticai.github.io/agentvectordb/getting-started)
+- [API Reference](https://superagenticai.github.io/agentvectordb/api-reference)
+- [Examples](https://superagenticai.github.io/agentvectordb/examples)
+- [FAQ](https://superagenticai.github.io/agentvectordb/faq)
 
 ## 🌟 Overview
 AgentVectorDB (AVDB) is a specialized memory management system developed by [Superagentic AI](https://super-agentic.ai). Built on top of LanceDB's powerful vector database capabilities, it provides optimized cognitive architecture for AI agents.
