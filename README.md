@@ -56,7 +56,8 @@ pip install "agentvectordb[all]"
 # Development installation
 git clone https://github.com/superagenticai/agentvectordb.git
 cd agentvectordb
-pip install -e ".[dev]"
+pip install -e ".[dev]"  
+#For windows if you encounter UnicodeDecodeError set $env:PYTHONUTF8=1
 ```
 
 ## 🚀 Quick Start
