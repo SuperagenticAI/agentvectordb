@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="agentvectordb",
-    version="0.0.2",
+    version="0.0.3",
     author="Shashi Jagtap",
     author_email="shashi@super-agentic.ai",
     description="AgentVectorDB: The Cognitive Core for Your AI Agents. A lightweight, embeddable vector database for Agentic AI systems, built on LanceDB.",
