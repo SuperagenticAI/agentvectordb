@@ -1,4 +1,11 @@
-# 🧠 AgentVectorDB (AVDB)
+<p align="center">
+  <img src="assets/avdb-header.png" alt="AgentVectorDB Header" width="100%"/>
+</p>
+
+# AgentVectorDB (AVDB)
+<p align="left">
+  <img src="assets/AgentVectorDB.png" alt="AgentVectorDB Logo" width="150"/>
+</p>
 
 [![PyPI version](https://badge.fury.io/py/agentvectordb.svg)](https://badge.fury.io/py/agentvectordb)
 [![Python](https://img.shields.io/pypi/pyversions/agentvectordb.svg?logo=python&logoColor=white&color=blue)](https://pypi.org/project/agentvectordb)
