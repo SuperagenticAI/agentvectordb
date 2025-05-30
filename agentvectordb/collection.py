@@ -194,7 +194,7 @@ class AgentMemoryCollection:
 
         final_filter = filter_sql
         if entry_id:
-            id_f = f"id = '{str(entry_id).replace("'", "''")}'"
+            id_f = "id = '{}'".format(str(entry_id).replace("'", "''"))
             final_filter = f"({id_f}) AND ({filter_sql})" if filter_sql else id_f
         if not final_filter:
             raise ValueError("Valid delete filter required.")
