@@ -15,7 +15,7 @@ from .exceptions import (
 from .schemas import MemoryEntrySchema, create_dynamic_memory_entry_schema
 from .store import AgentVectorDBStore
 
-__version__ = "0.3.0"  # MVP version with Store/Collection API
+__version__ = "0.0.4"
 
 __all__ = [
     # Core API
