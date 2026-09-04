@@ -57,9 +57,6 @@ We extend LanceDB's robust foundation with agent-specific features:
 # Basic installation
 pip install agentvectordb
 
-# With all extras (recommended)
-pip install "agentvectordb[all]"
-
 # Development installation
 git clone https://github.com/superagenticai/agentvectordb.git
 cd agentvectordb
@@ -115,7 +112,6 @@ store = AgentVectorDBStore(db_path="./db")
 Methods:
 - `get_or_create_collection()`
 - `list_collections()`
-- `delete_collection()`
 
 #### AsyncAgentVectorDBStore
 ```python
