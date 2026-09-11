@@ -41,6 +41,12 @@ class AsyncAgentMemoryCollection:
         filter_sql: Optional[str] = None,
         select_columns: Optional[List[str]] = None,
         include_vector: bool = False,
+        use_composite_score: bool = False,
+        similarity_weight: float = 0.5,
+        recency_weight: float = 0.3,
+        importance_weight: float = 0.2,
+        recency_half_life_seconds: float = 86400.0,
+        candidate_multiplier: int = 4,
     ) -> List[Dict[str, Any]]:
         return await asyncio.to_thread(
             self._sync_collection.query,
@@ -50,6 +56,12 @@ class AsyncAgentMemoryCollection:
             filter_sql=filter_sql,
             select_columns=select_columns,
             include_vector=include_vector,
+            use_composite_score=use_composite_score,
+            similarity_weight=similarity_weight,
+            recency_weight=recency_weight,
+            importance_weight=importance_weight,
+            recency_half_life_seconds=recency_half_life_seconds,
+            candidate_multiplier=candidate_multiplier,
         )
 
     async def get_by_id(self, entry_id: str, select_columns: Optional[List[str]] = None) -> Optional[Dict[str, Any]]:
