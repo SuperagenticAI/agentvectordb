@@ -1,3 +1,4 @@
+import math
 import time
 import uuid
 from typing import Any, Dict, List, Optional, Type
@@ -121,6 +122,83 @@ class AgentMemoryCollection:
         except Exception as e:
             print(f"Warn: Col '{self.name}': Failed timestamp update: {e}")
 
+
+    @staticmethod
+    def _similarity_from_distance(distance: float) -> float:
+        """Map LanceDB L2/_distance to a (0, 1] similarity."""
+        try:
+            d = float(distance)
+        except (TypeError, ValueError):
+            return 0.0
+        if d < 0:
+            d = 0.0
+        return 1.0 / (1.0 + d)
+
+    @staticmethod
+    def _recency_score(timestamp: float, now: float, half_life_seconds: float) -> float:
+        """Exponential decay: 1.0 at now, 0.5 after half_life_seconds."""
+        if half_life_seconds <= 0:
+            return 1.0
+        try:
+            age = max(0.0, float(now) - float(timestamp))
+        except (TypeError, ValueError):
+            return 0.0
+        return math.exp(-math.log(2.0) * age / half_life_seconds)
+
+    @staticmethod
+    def _entry_timestamp(entry: Dict[str, Any]) -> float:
+        for key in ("last_accessed_at", "created_at", "timestamp_last_accessed", "timestamp_created"):
+            if key in entry and entry[key] is not None:
+                try:
+                    return float(entry[key])
+                except (TypeError, ValueError):
+                    continue
+        return 0.0
+
+    def _rerank_composite(
+        self,
+        results: List[Dict[str, Any]],
+        k: int,
+        similarity_weight: float,
+        recency_weight: float,
+        importance_weight: float,
+        recency_half_life_seconds: float,
+    ) -> List[Dict[str, Any]]:
+        now = time.time()
+        weight_sum = similarity_weight + recency_weight + importance_weight
+        if weight_sum <= 0:
+            raise ValueError("Composite score weights must sum to a positive value.")
+
+        scored: List[Dict[str, Any]] = []
+        for row in results:
+            entry = dict(row)
+            distance = entry.get("_distance", entry.get("_score", entry.get("distance")))
+            if distance is None:
+                sim = 0.0
+            else:
+                sim = self._similarity_from_distance(distance)
+            importance = entry.get("importance_score", 0.0)
+            try:
+                importance = float(importance) if importance is not None else 0.0
+            except (TypeError, ValueError):
+                importance = 0.0
+            importance_n = max(0.0, min(1.0, importance))
+            recency = self._recency_score(
+                self._entry_timestamp(entry), now, recency_half_life_seconds
+            )
+            composite = (
+                similarity_weight * sim
+                + recency_weight * recency
+                + importance_weight * importance_n
+            ) / weight_sum
+            entry["composite_score"] = composite
+            entry["similarity_score"] = sim
+            entry["recency_score"] = recency
+            scored.append(entry)
+
+        scored.sort(key=lambda e: e.get("composite_score", 0.0), reverse=True)
+        return scored[:k]
+
     def query(
         self,
         query_text: Optional[str] = None,
@@ -129,24 +207,60 @@ class AgentMemoryCollection:
         filter_sql: Optional[str] = None,
         select_columns: Optional[List[str]] = None,
         include_vector: bool = False,
+        use_composite_score: bool = False,
+        similarity_weight: float = 0.5,
+        recency_weight: float = 0.3,
+        importance_weight: float = 0.2,
+        recency_half_life_seconds: float = 86400.0,
+        candidate_multiplier: int = 4,
     ) -> List[Dict[str, Any]]:
         """
         Query the collection using semantic search.
+
+        When use_composite_score is True, fetch a larger candidate pool then re-rank by
+        similarity, recency, and importance (CrewAI-style cognitive recall). Default
+        False keeps pure vector ranking for backward compatibility.
         """
         try:
             if query_text and self.embedding_function and not query_vector:
                 query_vector = self.embedding_function.generate([query_text])[0]
 
+            fetch_k = k
+            if use_composite_score:
+                fetch_k = max(k, k * max(1, int(candidate_multiplier)))
+
             if query_vector is not None:
                 # Use LanceDB's search API for vector search
-                search_obj = self.table.search(query_vector, vector_column_name="vector").limit(k)
+                search_obj = self.table.search(query_vector, vector_column_name="vector").limit(fetch_k)
             else:
-                search_obj = self.table.search(query=query_text, columns=["content"]).limit(k)
+                search_obj = self.table.search(query=query_text, columns=["content"]).limit(fetch_k)
 
             if filter_sql:
                 search_obj = search_obj.where(filter_sql)
 
+            if select_columns:
+                cols = list(select_columns)
+                if use_composite_score:
+                    for needed in ("importance_score", "created_at", "last_accessed_at", "id"):
+                        if needed not in cols:
+                            cols.append(needed)
+                search_obj = search_obj.select(cols)
+
             results = search_obj.to_list()
+
+            if use_composite_score and results:
+                results = self._rerank_composite(
+                    results,
+                    k=k,
+                    similarity_weight=similarity_weight,
+                    recency_weight=recency_weight,
+                    importance_weight=importance_weight,
+                    recency_half_life_seconds=recency_half_life_seconds,
+                )
+
+            if not include_vector:
+                for row in results:
+                    row.pop("vector", None)
 
             if self.update_last_accessed_on_query and results:
                 current_time = time.time()
